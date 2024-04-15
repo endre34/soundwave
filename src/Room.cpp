@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <cmath>
 
-#include "room.h"
+#include "Room.hpp"
 
 double myRound(double value, int decimal_places)
 {

@@ -5,8 +5,8 @@
  *      Author: Endre
  */
 
-#ifndef ROOM_H_
-#define ROOM_H_
+#ifndef ROOM_HPP_
+#define ROOM_HPP_
 
 #include <vector>
 
@@ -45,13 +45,7 @@ public:
 
 	Point calcReflectionP(const Wall wall);
 
-private:
-	enum Direction
-	{
-		To_Source,
-		To_Target
-	};
-
+protected:
 	struct ReflectionP
 	{
 		Point point;
@@ -60,11 +54,19 @@ private:
 		ReflectionP(const Point point, const Wall wall);
 	};
 
-	int sizeX, sizeY;											// Meters
-	Point source, target;										// Milimeters
+	Point source, target;
 	std::vector<ReflectionP> reflectionPoints;
+
+private:
+	enum Direction
+	{
+		To_Source,
+		To_Target
+	};
+
+	int sizeX, sizeY;
 	std::vector<int> distances;
-	int waveleght;												// Milimeters
+	int waveleght;
 	double period;
 
 	double calcDir(const Point p1, const Point p2);
@@ -75,4 +77,4 @@ private:
 };
 
 
-#endif /* ROOM_H_ */
+#endif /* ROOM_HPP_ */
