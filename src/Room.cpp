@@ -1,8 +1,6 @@
 /*
- * room.cpp
- *
- *  Created on: Apr 3, 2024
- *      Author: Endre
+ *  Project: SzalontaGrafika2024
+ *   Author: Endre
  */
 
 #include <iostream>
@@ -17,17 +15,10 @@ double myRound(double value, int decimal_places)
     return std::round(value * multiplier) / multiplier;
 }
 
-
-Point::Point()
-{
-//	x = 0;
-//	y = 0;
-}
-
 Point::Point(const int x, const int y)
 {
-	this -> x = x;
-	this -> y = y;
+	this->x = x;
+	this->y = y;
 }
 
 void Point::to_mm()
@@ -99,7 +90,7 @@ Point Room::getNextRP(const Direction direction, const Wall wall,
 	}
 }
 
-void Room::setSource(const Point source)					// in meters
+void Room::setSource(const Point& source)					// in meters
 {
 	this->source = source;
 	this->source.to_mm();
@@ -118,6 +109,12 @@ void Room::setParams(const int freq)
 
 	std::cout << "Periodus: " << period << " s" << std::endl;
 	std::cout << "Hullamhossz: " << waveleght << " mm" << std::endl;
+}
+
+void Room::setSize(const int sizeX, const int sizeY)
+{
+	this->sizeX = sizeX;
+	this->sizeY = sizeY;
 }
 
 Point Room::calcReflectionP(const Wall wall)

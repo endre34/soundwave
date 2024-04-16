@@ -1,10 +1,7 @@
-//============================================================================
-// Name        : SzalontaGrafika2024.cpp
-// Author      : 
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
-//============================================================================
+/*
+ *  Project: SzalontaGrafika2024
+ *   Author: Endre
+ */
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
@@ -18,8 +15,5 @@ using namespace sf;
 
 int main()
 {
-	DrawRoom room;
-
-
     return 0;
 }
