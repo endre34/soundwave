@@ -15,40 +15,23 @@ double myRound(double value, int decimal_places)
     return std::round(value * multiplier) / multiplier;
 }
 
-Point::Point(const int x, const int y)
+int to_milis(double meters)
 {
-	this->x = x;
-	this->y = y;
+	return static_cast<int>(meters * 1000.0);
 }
 
-void Point::to_mm()
+Room::Room(double sizeX, double sizeY)
 {
-	x = x * 1000;
-	y = y * 1000;
-}
-
-void Point::out()
-{
-	std::cout << '(' << (double)x / 1000.0 << ", " << (double)y / 1000.0 << ')' << std::setprecision(5) <<  std::endl;
-}
-
-Room::ReflectionP::ReflectionP(const Point point, const Wall wall)
-{
-	this->point = point;
-	this->wall = wall;
-}
-
-Room::Room(const int sizeX, const int sizeY)
-{
-	this->sizeX = sizeX;
+	this->sizeX = static_cast<int>(sizeX * 1000.0);
 	this->sizeY = sizeY;
-//	point1 = {farthest.x / 3, farthest.y / 2};
-//	point2 = {farthest.x * 2 / 3, farthest.y / 2};
+
+	waveleght = 0;
+	period = 0;
 }
 
-double Room::calcDir(const Point p1, const Point p2)
+double Room::calcDir(Point p1, Point p2)
 {
-	return ((double)p2.y - (double)p1.y) / ((double)p2.x - (double)p1.x);
+	return (p2.doubleGetY() - p1.doubleGetY()) / (p2.doubleGetX() - p1.doubleGetX());
 }
 
 Point Room::getInitalRP(const Wall wall)
@@ -56,50 +39,48 @@ Point Room::getInitalRP(const Wall wall)
 	switch (wall)
 	{
 	case Top:												// y = 0 && x variable
-		return Point((source.x + target.x) / 2, 0);
+		return Point((source.intGetX() + target.intGetX()) / 2, 0);
 	case Bottom:											// y = sizeY && x variable
-		return Point((source.x + target.x) / 2, sizeY * 1000);
+		return Point((source.intGetX() + target.intGetX()) / 2, sizeY * 1000);
 	case Left:												// y variable && x = 0
-		return Point(0, (source.y + target.y) / 2);
+		return Point(0, (source.intGetY() + target.intGetY()) / 2);
 	case Right:												// y variable && x = sizeX
-		return Point(sizeX * 1000, (source.y + target.y) / 2);
+		return Point(sizeX * 1000, (source.intGetY() + target.intGetY()) / 2);
 	default:
 		throw std::overflow_error("ERROR: no such value in enum");
 		return Point(-1, -1);
 	}
 }
 
-Point Room::getNextRP(const Direction direction, const Wall wall,
-		const int increment, const Point reflectionP)
+ReflectionPoint Room::getNextRP(const Direction direction,
+		const int increment, ReflectionPoint reflectionP)
 {
-	if (wall == Right || wall == Left)
+	if (reflectionP.getWall() == Right || reflectionP.getWall() == Left)
 	{
 		int y = direction == To_Source ?
-				reflectionP.y + (source.y - target.y) / abs(source.y - target.y) * increment :
-				reflectionP.y + (target.y - source.y) / abs(target.y - source.y) * increment ;
+				reflectionP.intGetY() + (source.intGetY() - target.intGetY()) / abs(source.intGetY() - target.intGetY()) * increment :
+				reflectionP.intGetY() + (target.intGetY() - source.intGetY()) / abs(target.intGetY() - source.intGetY()) * increment ;
 
-		return Point(reflectionP.x, y);
+		return ReflectionPoint(reflectionP.intGetX(), y, reflectionP.getWall());
 	}
 	else
 	{
 		int x = direction == To_Source ?
-				reflectionP.x + (source.x - target.x) / abs(source.x - target.x) * increment :
-				reflectionP.x + (target.x - source.x) / abs(target.x - source.x) * increment ;
+				reflectionP.intGetX() + (source.intGetX() - target.intGetX()) / abs(source.intGetX() - target.intGetX()) * increment :
+				reflectionP.intGetX() + (target.intGetX() - source.intGetX()) / abs(target.intGetX() - source.intGetX()) * increment ;
 
-		return Point(x, reflectionP.y);
+		return ReflectionPoint(x, reflectionP.intGetY(), reflectionP.getWall());
 	}
 }
 
 void Room::setSource(const Point& source)					// in meters
 {
 	this->source = source;
-	this->source.to_mm();
 }
 
 void Room::setTarget(const Point target)					// in meters
 {
 	this->target = target;
-	this->target.to_mm();
 }
 
 void Room::setParams(const int freq)
@@ -120,11 +101,16 @@ void Room::setSize(const int sizeX, const int sizeY)
 Point Room::calcReflectionP(const Wall wall)
 {
 
-	Point reflectionP = getInitalRP(wall);
+	ReflectionPoint reflectionP;
+
+	{
+		Point point = getInitalRP(wall);
+		reflectionP = ReflectionPoint(point.intGetX(), point.intGetY(), wall);
+	}
 
 	int increment = wall == Right || wall == Left ? 		// set effective increment
-			abs(source.y - target.y) / 3 :
-			abs(source.x - target.x) / 3 ;
+			abs(source.intGetY() - target.intGetY()) / 3 :
+			abs(source.intGetX() - target.intGetX()) / 3 ;
 
 	bool with_mR = false;
 
@@ -148,8 +134,7 @@ Point Room::calcReflectionP(const Wall wall)
 //	std::cout << dir_fromSource << std::endl;
 
 	Direction originalDirection = abs(dir_fromSource) < abs(dir_fromTarget) ? To_Source : To_Target;
-	bool GO = true;
-	while (abs(dir_fromSource) != abs(dir_fromTarget) && GO)
+	while (abs(dir_fromSource) != abs(dir_fromTarget))
 	{
 		Direction direction = abs(dir_fromSource) < abs(dir_fromTarget) ? To_Source : To_Target;
 
@@ -161,7 +146,7 @@ Point Room::calcReflectionP(const Wall wall)
 				break;
 		}
 
-		reflectionP = getNextRP(direction, wall, increment, reflectionP);
+		reflectionP = getNextRP(direction, increment, reflectionP);
 
 		if (with_mR)
 		{
@@ -191,9 +176,9 @@ void Room::calcReflectionPoints()
 	for (int i = Top; i <= Right; ++i)
 	{
 		Point reflectionP = calcReflectionP(static_cast<Wall>(i));
-		if (reflectionP.x != -1)
+		if (reflectionP.intGetX() != -1)
 		{
-			reflectionPoints.emplace_back(ReflectionP(reflectionP, static_cast<Wall>(i)));
+			reflectionPoints.emplace_back(ReflectionPoint(reflectionP.intGetX(), reflectionP.intGetY(), static_cast<Wall>(i)));
 		}
 	}
 }
@@ -204,13 +189,13 @@ void Room::calcDistances()
 	{
 		for (int i = 0; i < (int)reflectionPoints.size(); ++i)
 		{
-			distances.emplace_back(sqrt(pow(reflectionPoints[i].point.x - source.x, 2) + pow(reflectionPoints[i].point.y - source.y, 2))
-					+ sqrt((pow(target.x - reflectionPoints[i].point.x, 2) + pow(target.y - reflectionPoints[i].point.y, 2))));
+			distances.emplace_back(sqrt(pow(reflectionPoints[i].intGetX() - source.intGetX(), 2) + pow(reflectionPoints[i].intGetY() - source.intGetY(), 2))
+					+ sqrt((pow(target.intGetX() - reflectionPoints[i].intGetX(), 2) + pow(target.intGetY() - reflectionPoints[i].intGetY(), 2))));
 
 			std::cout << "Distance of [" << i << "]: " << distances[i] << " mm" << std::endl;
 		}
 
-		distances.emplace_back(sqrt((pow(target.x - source.x, 2) + pow(target.y - source.y, 2))));
+		distances.emplace_back(sqrt((pow(target.intGetX() - source.intGetX(), 2) + pow(target.intGetY() - source.intGetY(), 2))));
 
 		std::cout << "Distance of [direct]: " << distances.back() << " mm" << std::endl;
 	}

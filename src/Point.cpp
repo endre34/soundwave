@@ -17,6 +17,12 @@ Point::Point(int x, int y)
 	this->y = y;
 }
 
+Point::Point()
+{
+	x = 0;
+	y = 0;
+}
+
 void Point::setCoords(double x, double y)
 {
 	setX(x);
@@ -85,6 +91,16 @@ ReflectionPoint::ReflectionPoint(int x, int y, Wall wall)
 : Point(x, y)
 {
 	this->wall = wall;
+}
+
+ReflectionPoint::ReflectionPoint()
+{
+	wall = Top;
+}
+
+Wall ReflectionPoint::getWall()
+{
+	return wall;
 }
 
 

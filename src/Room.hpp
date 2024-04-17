@@ -8,30 +8,12 @@
 
 #include <vector>
 
-enum Wall
-{
-	Top,
-	Bottom,
-	Left,
-	Right
-};
-
-struct Point
-{
-	int x;										// Milimeters
-	int y;
-
-	Point(const int x, const int y);
-
-	void to_mm();
-	void to_m();								// not available
-	void out();
-};
+#include "Point.hpp"
 
 class Room										// Mi az amplitudo es az ido???
 {
 public:
-	Room(const int sizeX, const int sizeY);
+	Room(double sizeX, double sizeY);
 
 	void setSource(const Point& source);
 	void setTarget(const Point target);
@@ -43,20 +25,11 @@ public:
 
 	Point calcReflectionP(const Wall wall);
 
-protected:
-	struct ReflectionP
-	{
-		Point point;
-		Wall wall;
-
-		ReflectionP(const Point point, const Wall wall);
-	};
-
+private:
 	int sizeX, sizeY;
 	Point source, target;
-	std::vector<ReflectionP> reflectionPoints;
+	std::vector<ReflectionPoint> reflectionPoints;
 
-private:
 	enum Direction
 	{
 		To_Source,
@@ -70,8 +43,8 @@ private:
 	double calcDir(const Point p1, const Point p2);
 
 	Point getInitalRP(const Wall wall);
-	Point getNextRP(const Direction direction, const Wall wall,
-			const int increment, const Point reflectionP);
+	ReflectionPoint getNextRP(const Direction direction,
+			const int increment, const ReflectionPoint reflectionP);
 };
 
 

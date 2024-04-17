@@ -21,6 +21,7 @@ class Point
 public:
 	Point(double x, double y);
 	Point(int x, int y);
+	Point();
 
 	void setCoords(double x, double y);
 	void setX(double x);
@@ -47,6 +48,9 @@ class ReflectionPoint : public Point
 public:
 	ReflectionPoint(double x, double y, Wall wall);
 	ReflectionPoint(int x, int y, Wall wall);
+	ReflectionPoint();
+
+	Wall getWall();
 
 private:
 	Wall wall;

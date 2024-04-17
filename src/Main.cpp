@@ -15,5 +15,6 @@ using namespace sf;
 
 int main()
 {
+	Room room(16, 9);
     return 0;
 }
