@@ -29,6 +29,15 @@ Room::Room(double sizeX, double sizeY)
 	period = 0;
 }
 
+Room::Room()
+{
+	sizeX = 0;
+	sizeY = 0;
+
+	waveleght = 0;
+	period = 0;
+}
+
 double Room::calcDir(Point p1, Point p2)
 {
 	return (p2.doubleGetY() - p1.doubleGetY()) / (p2.doubleGetX() - p1.doubleGetX());
@@ -100,7 +109,6 @@ void Room::setSize(const int sizeX, const int sizeY)
 
 Point Room::calcReflectionP(const Wall wall)
 {
-
 	ReflectionPoint reflectionP;
 
 	{

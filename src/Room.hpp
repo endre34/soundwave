@@ -14,6 +14,7 @@ class Room										// Mi az amplitudo es az ido???
 {
 public:
 	Room(double sizeX, double sizeY);
+	Room();
 
 	void setSource(const Point& source);
 	void setTarget(const Point target);

@@ -16,5 +16,6 @@ using namespace sf;
 int main()
 {
 	Room room(16, 9);
+	DrawRoom droom(room);
     return 0;
 }
