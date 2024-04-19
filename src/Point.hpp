@@ -21,6 +21,7 @@ class Point
 public:
 	Point(double x, double y);
 	Point(int x, int y);
+	Point(const Point& point);
 	Point();
 
 	void setCoords(double x, double y);
@@ -31,11 +32,13 @@ public:
 	void setX(int x);
 	void setY(int y);
 
-	int intGetX();
-	int intGetY();
+	int getXMillis() const;
+	int getYMillis() const;
 
-	double doubleGetX();
-	double doubleGetY();
+	double getXMeters() const;
+	double getYMeters() const;
+
+	bool isValid() const;
 
 	friend std::ostream& operator <<(std::ostream& out, const Point& point);
 
@@ -50,7 +53,7 @@ public:
 	ReflectionPoint(int x, int y, Wall wall);
 	ReflectionPoint();
 
-	Wall getWall();
+	Wall getWall() const;
 
 private:
 	Wall wall;

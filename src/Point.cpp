@@ -4,6 +4,10 @@
  */
 
 #include "Point.hpp"
+#include "utils.hpp"
+
+using namespace std;
+
 
 Point::Point(double x, double y)
 {
@@ -11,16 +15,25 @@ Point::Point(double x, double y)
 	this->y = static_cast<int>(y * 1000.0);
 }
 
-Point::Point(int x, int y)
+Point::Point(int x, int y) :
+		x { x },
+		y { y }
 {
-	this->x = x;
-	this->y = y;
+	// empty
 }
 
-Point::Point()
+Point::Point(const Point& point) :
+		x { point.x },
+		y { point.y }
 {
-	x = 0;
-	y = 0;
+	// empty
+}
+
+Point::Point() :
+		x { 0 },
+		y { 0 }
+{
+	// empty
 }
 
 void Point::setCoords(double x, double y)
@@ -55,40 +68,47 @@ void Point::setY(int y)
 	this->y = y;
 }
 
-int Point::intGetX()
+int Point::getXMillis() const
 {
 	return x;
 }
 
-int Point::intGetY()
+int Point::getYMillis() const
 {
 	return y;
 }
 
-double Point::doubleGetX()
+double Point::getXMeters() const
 {
 	return static_cast<double>(x) / 1000.0;
 }
 
-double Point::doubleGetY()
+double Point::getYMeters() const
 {
 	return static_cast<double>(y) / 1000.0;
 }
 
-std::ostream& operator <<(std::ostream& out, const Point& point)
+bool Point::isValid() const
 {
-	out << "(" << static_cast<double>(point.x) / 1000.0 << ", " << static_cast<double>(point.y) / 1000.0 << ")";
+	return x >= 0 && y >= 0;
+}
+
+ostream& operator <<(ostream& out, const Point& point)
+{
+	out << "(" << point.getXMeters() << ", " << point.getYMeters() << ")";
 	return out;
 }
 
-ReflectionPoint::ReflectionPoint(double x, double y, Wall wall)
-: Point(x, y)
+
+
+ReflectionPoint::ReflectionPoint(double x, double y, Wall wall) :
+		Point(x, y)
 {
 	this->wall = wall;
 }
 
-ReflectionPoint::ReflectionPoint(int x, int y, Wall wall)
-: Point(x, y)
+ReflectionPoint::ReflectionPoint(int x, int y, Wall wall) :
+		Point(x, y)
 {
 	this->wall = wall;
 }
@@ -98,7 +118,7 @@ ReflectionPoint::ReflectionPoint()
 	wall = Top;
 }
 
-Wall ReflectionPoint::getWall()
+Wall ReflectionPoint::getWall() const
 {
 	return wall;
 }

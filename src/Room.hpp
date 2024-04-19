@@ -10,26 +10,35 @@
 
 #include "Point.hpp"
 
+
 class Room										// Mi az amplitudo es az ido???
 {
 public:
 	Room(double sizeX, double sizeY);
+	Room(const Room& room);
 	Room();
 
 	void setSource(const Point& source);
-	void setTarget(const Point target);
-	void setParams(const int freq);
-	void setSize(const int sizeX, const int sizeY);
+	void setTarget(const Point& target);
+	void setParams(int freq);
+	void setSize(double sizeX, double sizeY);
+
+	Point getSource();
 
 	void calcReflectionPoints();
 	void calcDistances();
 
-	Point calcReflectionP(const Wall wall);
+	ReflectionPoint calcReflectionPoint(Wall wall);
 
 private:
 	int sizeX, sizeY;
 	Point source, target;
 	std::vector<ReflectionPoint> reflectionPoints;
+
+	std::vector<int> distances;
+
+	int waveleght;
+	double period;
 
 	enum Direction
 	{
@@ -37,15 +46,10 @@ private:
 		To_Target
 	};
 
-	std::vector<int> distances;
-	int waveleght;
-	double period;
+	double calcDir(const Point& p1, const Point& p2);
 
-	double calcDir(const Point p1, const Point p2);
-
-	Point getInitalRP(const Wall wall);
-	ReflectionPoint getNextRP(const Direction direction,
-			const int increment, const ReflectionPoint reflectionP);
+	Point getInitalReflectionPoint(Wall wall);
+	ReflectionPoint getNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP);
 };
 
 

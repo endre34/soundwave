@@ -8,6 +8,7 @@
 
 #include "Room.hpp"
 #include "DrawRoom.hpp"
+#include "utils.hpp"
 
 using namespace std;
 using namespace sf;
@@ -15,7 +16,9 @@ using namespace sf;
 
 int main()
 {
-	Room room(16, 9);
+	Room room(16.0, 9.0);
+	room.calcReflectionPoints();
+
 	DrawRoom droom(room);
     return 0;
 }

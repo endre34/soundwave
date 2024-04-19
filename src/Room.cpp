@@ -8,77 +8,77 @@
 #include <cmath>
 
 #include "Room.hpp"
+#include "utils.hpp"
 
-double myRound(double value, int decimal_places)
+using namespace std;
+
+
+Room::Room(double sizeX, double sizeY) :
+		waveleght { 0 },
+		period { 0 }
 {
-    const double multiplier = std::pow(10.0, decimal_places);
-    return std::round(value * multiplier) / multiplier;
+	this->sizeX = to_millis(sizeX);
+	this->sizeY = to_millis(sizeY);
 }
 
-int to_milis(double meters)
+Room::Room(const Room& room) :
+		sizeX { room.sizeX },
+		sizeY { room.sizeY },
+		waveleght { room.waveleght },
+		period { room.period }
 {
-	return static_cast<int>(meters * 1000.0);
+	// empty
 }
 
-Room::Room(double sizeX, double sizeY)
+Room::Room() :
+		sizeX { 0 },
+		sizeY { 0 },
+		waveleght { 0 },
+		period { 0 }
 {
-	this->sizeX = static_cast<int>(sizeX * 1000.0);
-	this->sizeY = sizeY;
-
-	waveleght = 0;
-	period = 0;
+	// empty
 }
 
-Room::Room()
+double Room::calcDir(const Point& p1, const Point& p2)
 {
-	sizeX = 0;
-	sizeY = 0;
-
-	waveleght = 0;
-	period = 0;
+	return (p2.getYMeters() - p1.getYMeters()) / (p2.getXMeters() - p1.getXMeters());
 }
 
-double Room::calcDir(Point p1, Point p2)
-{
-	return (p2.doubleGetY() - p1.doubleGetY()) / (p2.doubleGetX() - p1.doubleGetX());
-}
-
-Point Room::getInitalRP(const Wall wall)
+Point Room::getInitalReflectionPoint(Wall wall)
 {
 	switch (wall)
 	{
 	case Top:												// y = 0 && x variable
-		return Point((source.intGetX() + target.intGetX()) / 2, 0);
+		return Point((source.getXMillis() + target.getXMillis()) / 2, 0);
 	case Bottom:											// y = sizeY && x variable
-		return Point((source.intGetX() + target.intGetX()) / 2, sizeY * 1000);
+		return Point((source.getXMillis() + target.getXMillis()) / 2, sizeY * 1000);
 	case Left:												// y variable && x = 0
-		return Point(0, (source.intGetY() + target.intGetY()) / 2);
+		return Point(0, (source.getYMillis() + target.getYMillis()) / 2);
 	case Right:												// y variable && x = sizeX
-		return Point(sizeX * 1000, (source.intGetY() + target.intGetY()) / 2);
+		return Point(sizeX * 1000, (source.getYMillis() + target.getYMillis()) / 2);
 	default:
-		throw std::overflow_error("ERROR: no such value in enum");
+		throw overflow_error("ERROR: no such value in enum");
 		return Point(-1, -1);
 	}
 }
 
-ReflectionPoint Room::getNextRP(const Direction direction,
-		const int increment, ReflectionPoint reflectionP)
+ReflectionPoint Room::getNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP)
 {
 	if (reflectionP.getWall() == Right || reflectionP.getWall() == Left)
 	{
 		int y = direction == To_Source ?
-				reflectionP.intGetY() + (source.intGetY() - target.intGetY()) / abs(source.intGetY() - target.intGetY()) * increment :
-				reflectionP.intGetY() + (target.intGetY() - source.intGetY()) / abs(target.intGetY() - source.intGetY()) * increment ;
+				reflectionP.getYMillis() + (source.getYMillis() - target.getYMillis()) / abs(source.getYMillis() - target.getYMillis()) * increment :
+				reflectionP.getYMillis() + (target.getYMillis() - source.getYMillis()) / abs(target.getYMillis() - source.getYMillis()) * increment ;
 
-		return ReflectionPoint(reflectionP.intGetX(), y, reflectionP.getWall());
+		return ReflectionPoint(reflectionP.getXMillis(), y, reflectionP.getWall());
 	}
 	else
 	{
 		int x = direction == To_Source ?
-				reflectionP.intGetX() + (source.intGetX() - target.intGetX()) / abs(source.intGetX() - target.intGetX()) * increment :
-				reflectionP.intGetX() + (target.intGetX() - source.intGetX()) / abs(target.intGetX() - source.intGetX()) * increment ;
+				reflectionP.getXMillis() + (source.getXMillis() - target.getXMillis()) / abs(source.getXMillis() - target.getXMillis()) * increment :
+				reflectionP.getXMillis() + (target.getXMillis() - source.getXMillis()) / abs(target.getXMillis() - source.getXMillis()) * increment ;
 
-		return ReflectionPoint(x, reflectionP.intGetY(), reflectionP.getWall());
+		return ReflectionPoint(x, reflectionP.getYMillis(), reflectionP.getWall());
 	}
 }
 
@@ -87,38 +87,43 @@ void Room::setSource(const Point& source)					// in meters
 	this->source = source;
 }
 
-void Room::setTarget(const Point target)					// in meters
+Point Room::getSource()
+{
+	return source;
+}
+
+void Room::setTarget(const Point& target)					// in meters
 {
 	this->target = target;
 }
 
-void Room::setParams(const int freq)
+void Room::setParams(int freq)
 {
 	period = 1.0 / (double)freq;
 	waveleght = round(340000.0 * period);
 
-	std::cout << "Periodus: " << period << " s" << std::endl;
-	std::cout << "Hullamhossz: " << waveleght << " mm" << std::endl;
+	cout << "Periodus: " << period * 1000 << " ms" << endl;
+	cout << "Hullamhossz: " << waveleght << " mm" << endl;
 }
 
-void Room::setSize(const int sizeX, const int sizeY)
+void Room::setSize(double sizeX, double sizeY)
 {
-	this->sizeX = sizeX;
-	this->sizeY = sizeY;
+	this->sizeX = to_millis(sizeX);
+	this->sizeY = to_millis(sizeY);
 }
 
-Point Room::calcReflectionP(const Wall wall)
+ReflectionPoint Room::calcReflectionPoint(Wall wall)
 {
-	ReflectionPoint reflectionP;
+	ReflectionPoint reflPt;
 
 	{
-		Point point = getInitalRP(wall);
-		reflectionP = ReflectionPoint(point.intGetX(), point.intGetY(), wall);
+		Point point = getInitalReflectionPoint(wall);
+		reflPt = ReflectionPoint(point.getXMillis(), point.getYMillis(), wall);
 	}
 
 	int increment = wall == Right || wall == Left ? 		// set effective increment
-			abs(source.intGetY() - target.intGetY()) / 3 :
-			abs(source.intGetX() - target.intGetX()) / 3 ;
+			abs(source.getYMillis() - target.getYMillis()) / 3 :
+			abs(source.getXMillis() - target.getXMillis()) / 3 ;
 
 	bool with_mR = false;
 
@@ -126,20 +131,20 @@ Point Room::calcReflectionP(const Wall wall)
 	double dir_fromTarget;
 	if (with_mR)
 	{
-		dir_fromSource = myRound(calcDir(source, reflectionP), 3);
-		dir_fromTarget = myRound(calcDir(target, reflectionP), 3);
+		dir_fromSource = round_to_precision(calcDir(source, reflPt), 3);
+		dir_fromTarget = round_to_precision(calcDir(target, reflPt), 3);
 	}
 	else
 	{
-		dir_fromSource = calcDir(source, reflectionP);
-		dir_fromTarget = calcDir(target, reflectionP);
+		dir_fromSource = calcDir(source, reflPt);
+		dir_fromTarget = calcDir(target, reflPt);
 	}
 
-//	std::cout << "RP: ";
+//	cout << "RP: ";
 //	reflectionP.out();
-//	std::cout << "Pitch: " << dir_fromSource << ' ' << dir_fromTarget << std::setprecision(5) << std::endl;
+//	cout << "Pitch: " << dir_fromSource << ' ' << dir_fromTarget << setprecision(5) << endl;
 //
-//	std::cout << dir_fromSource << std::endl;
+//	cout << dir_fromSource << endl;
 
 	Direction originalDirection = abs(dir_fromSource) < abs(dir_fromTarget) ? To_Source : To_Target;
 	while (abs(dir_fromSource) != abs(dir_fromTarget))
@@ -154,62 +159,66 @@ Point Room::calcReflectionP(const Wall wall)
 				break;
 		}
 
-		reflectionP = getNextRP(direction, increment, reflectionP);
+		reflPt = getNextReflectionPoint(direction, increment, reflPt);
 
 		if (with_mR)
 		{
-			dir_fromSource = myRound(calcDir(source, reflectionP), 3);
-			dir_fromTarget = myRound(calcDir(target, reflectionP), 3);
+			dir_fromSource = round_to_precision(calcDir(source, reflPt), 3);
+			dir_fromTarget = round_to_precision(calcDir(target, reflPt), 3);
 		}
 		else
 		{
-			dir_fromSource = calcDir(source, reflectionP);
-			dir_fromTarget = calcDir(target, reflectionP);
+			dir_fromSource = calcDir(source, reflPt);
+			dir_fromTarget = calcDir(target, reflPt);
 		}
 
-//		std::cout << "RP: ";
+//		cout << "RP: ";
 //		reflectionP.out();
-//		std::cout << "Pitch: " << dir_fromSource << ' ' << dir_fromTarget << std::setprecision(5) << std::endl;
-//		std::cout << "Increment: " << increment << std::endl;
+//		cout << "Pitch: " << dir_fromSource << ' ' << dir_fromTarget << setprecision(5) << endl;
+//		cout << "Increment: " << increment << endl;
 	}
 
 	if (dir_fromSource == dir_fromTarget)
-		return Point(-1, -1);									// Collision with target in reflection path
+		return ReflectionPoint(-1, -1, wall);					// Collision with target in reflection path
 																// No reflection point
-	return reflectionP;
+	return reflPt;
 }
 
 void Room::calcReflectionPoints()
 {
+	reflectionPoints.clear();
+
 	for (int i = Top; i <= Right; ++i)
 	{
-		Point reflectionP = calcReflectionP(static_cast<Wall>(i));
-		if (reflectionP.intGetX() != -1)
+		ReflectionPoint rp = calcReflectionPoint(static_cast<Wall>(i));
+		if (rp.isValid())
 		{
-			reflectionPoints.emplace_back(ReflectionPoint(reflectionP.intGetX(), reflectionP.intGetY(), static_cast<Wall>(i)));
+			reflectionPoints.push_back(rp);
 		}
 	}
 }
 
 void Room::calcDistances()
 {
+	distances.clear();
+
 	if ((int)reflectionPoints.size() != 0)
 	{
 		for (int i = 0; i < (int)reflectionPoints.size(); ++i)
 		{
-			distances.emplace_back(sqrt(pow(reflectionPoints[i].intGetX() - source.intGetX(), 2) + pow(reflectionPoints[i].intGetY() - source.intGetY(), 2))
-					+ sqrt((pow(target.intGetX() - reflectionPoints[i].intGetX(), 2) + pow(target.intGetY() - reflectionPoints[i].intGetY(), 2))));
+			distances.emplace_back(sqrt(pow(reflectionPoints[i].getXMillis() - source.getXMillis(), 2) + pow(reflectionPoints[i].getYMillis() - source.getYMillis(), 2))
+					+ sqrt((pow(target.getXMillis() - reflectionPoints[i].getXMillis(), 2) + pow(target.getYMillis() - reflectionPoints[i].getYMillis(), 2))));
 
-			std::cout << "Distance of [" << i << "]: " << distances[i] << " mm" << std::endl;
+			cout << "Distance of [" << i << "]: " << distances[i] << " mm" << endl;
 		}
 
-		distances.emplace_back(sqrt((pow(target.intGetX() - source.intGetX(), 2) + pow(target.intGetY() - source.intGetY(), 2))));
+		distances.emplace_back(sqrt((pow(target.getXMillis() - source.getXMillis(), 2) + pow(target.getYMillis() - source.getYMillis(), 2))));
 
-		std::cout << "Distance of [direct]: " << distances.back() << " mm" << std::endl;
+		cout << "Distance of [direct]: " << distances.back() << " mm" << endl;
 	}
 	else
 	{
-		throw std::overflow_error("No reflection points");
+		throw overflow_error("No reflection points");
 	}
 }
 
