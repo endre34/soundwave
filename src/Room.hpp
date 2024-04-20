@@ -47,9 +47,7 @@ private:
 		To_Target
 	};
 
-	double calcDir(const Point& p1, const Point& p2);
-
-	ReflectionPoint getInitalReflectionPoint(Wall wall);
+	ReflectionPoint calcInitalReflectionPoint(Wall wall);
 	ReflectionPoint getNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP);
 };
 

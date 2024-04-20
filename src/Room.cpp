@@ -37,26 +37,20 @@ Room::Room() :
 	// empty
 }
 
-double Room::calcDir(const Point& p1, const Point& p2)
-{
-	return (p2.getYMeters() - p1.getYMeters()) / (p2.getXMeters() - p1.getXMeters());
-}
-
-ReflectionPoint Room::getInitalReflectionPoint(Wall wall)
+ReflectionPoint Room::calcInitalReflectionPoint(Wall wall)
 {
 	switch (wall)
 	{
-	case Top:												// y = 0 && x variable
+	case Top:
 		return ReflectionPoint((source.getXMillis() + target.getXMillis()) / 2, 0, wall);
-	case Bottom:											// y = sizeY && x variable
+	case Bottom:
 		return ReflectionPoint((source.getXMillis() + target.getXMillis()) / 2, sizeY, wall);
-	case Left:												// y variable && x = 0
+	case Left:
 		return ReflectionPoint(0, (source.getYMillis() + target.getYMillis()) / 2, wall);
-	case Right:												// y variable && x = sizeX
+	case Right:
 		return ReflectionPoint(sizeX, (source.getYMillis() + target.getYMillis()) / 2, wall);
 	default:
-		throw overflow_error("ERROR: no such value in enum");
-		return ReflectionPoint(-1, -1, wall);
+		throw runtime_error("Unrecognized wall");
 	}
 }
 
@@ -117,55 +111,46 @@ int Room::calcDistance(const Point& point1, const Point& point2)
 
 ReflectionPoint Room::calcReflectionPoint(Wall wall)
 {
-	ReflectionPoint reflPt = getInitalReflectionPoint(wall);
+	ReflectionPoint reflPt = calcInitalReflectionPoint(wall);
 
-	int increment = wall == Right || wall == Left ? 		// set effective increment
-			abs(source.getYMillis() - target.getYMillis()) / 3 :
-			abs(source.getXMillis() - target.getXMillis()) / 3 ;
+	double sourceGradient = Point::calcGradient(source, reflPt);
+	double targetGradient = Point::calcGradient(target, reflPt);
 
-	bool with_mR = false;
+	Direction prevDir = (wall == Right || wall == Left) ?
+			abs(sourceGradient) > abs(targetGradient) ? To_Source : To_Target :
+			abs(sourceGradient) < abs(targetGradient) ? To_Source : To_Target ;
 
-	double dir_fromSource;
-	double dir_fromTarget;
-	if (with_mR)
+	int increment = (wall == Right || wall == Left) ?
+			abs(source.getYMillis() - target.getYMillis()) / 4 :
+			abs(source.getXMillis() - target.getXMillis()) / 4 ;
+
+	while (abs(sourceGradient) != abs(targetGradient))
 	{
-		dir_fromSource = round_to_precision(calcDir(source, reflPt), 3);
-		dir_fromTarget = round_to_precision(calcDir(target, reflPt), 3);
-	}
-	else
-	{
-		dir_fromSource = calcDir(source, reflPt);
-		dir_fromTarget = calcDir(target, reflPt);
-	}
+		reflPt = getNextReflectionPoint(prevDir, increment, reflPt);
 
-	Direction originalDirection = abs(dir_fromSource) < abs(dir_fromTarget) ? To_Source : To_Target;
-	while (abs(dir_fromSource) != abs(dir_fromTarget))
-	{
-		Direction direction = abs(dir_fromSource) < abs(dir_fromTarget) ? To_Source : To_Target;
+		sourceGradient = Point::calcGradient(source, reflPt);
+		targetGradient = Point::calcGradient(target, reflPt);
 
-		if (originalDirection != direction)
+		Direction currDir = (wall == Right || wall == Left) ?
+				abs(sourceGradient) > abs(targetGradient) ? To_Source : To_Target :
+				abs(sourceGradient) < abs(targetGradient) ? To_Source : To_Target ;
+
+		if (prevDir != currDir)
 		{
-			originalDirection = direction;
+			prevDir = currDir;
 			increment = increment / 2;
 			if (increment == 0)
+			{
+				cout << "Increment is 0, exiting" << endl;
 				break;
+			}
 		}
 
-		reflPt = getNextReflectionPoint(direction, increment, reflPt);
-
-		if (with_mR)
-		{
-			dir_fromSource = round_to_precision(calcDir(source, reflPt), 3);
-			dir_fromTarget = round_to_precision(calcDir(target, reflPt), 3);
-		}
-		else
-		{
-			dir_fromSource = calcDir(source, reflPt);
-			dir_fromTarget = calcDir(target, reflPt);
-		}
+		cout << "Reflection point: " << reflPt;
+		cout << abs(abs(sourceGradient) - abs(targetGradient)) << " increment: " << increment << '\n';
 	}
 
-	if (dir_fromSource == dir_fromTarget)
+	if (sourceGradient == targetGradient)
 		return ReflectionPoint(-1, -1, wall);					// Collision with target in reflection path
 																// No reflection point
 	return reflPt;
@@ -181,6 +166,11 @@ void Room::calcReflectionPoints()
 		if (rp.isValid())
 		{
 			reflectionPoints.push_back(rp);
+			cout << "Reflection point: " << rp << endl;
+		}
+		else
+		{
+			cout << "Invalid reflection point" << endl;
 		}
 	}
 }

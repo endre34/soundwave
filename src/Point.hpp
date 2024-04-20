@@ -42,6 +42,8 @@ public:
 
 	friend std::ostream& operator <<(std::ostream& out, const Point& point);
 
+	static double calcGradient(const Point& p1, const Point& p2);
+
 private:
 	int x, y;
 };

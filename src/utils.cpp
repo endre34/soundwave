@@ -7,9 +7,10 @@
 
 #include "utils.hpp"
 
+
 double round_to_precision(double value, int decimal_places)
 {
-    const double multiplier = std::pow(10.0, decimal_places);
+    double multiplier = std::pow(10.0, decimal_places);
     return std::round(value * multiplier) / multiplier;
 }
 
