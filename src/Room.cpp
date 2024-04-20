@@ -37,6 +37,13 @@ Room::Room() :
 	// empty
 }
 
+Room::Direction Room::calcDirection(Wall wall, double sourceGradient, double targetGradient)
+{
+	return (wall == Right || wall == Left) ?
+			abs(sourceGradient) > abs(targetGradient) ? To_Source : To_Target :
+			abs(sourceGradient) < abs(targetGradient) ? To_Source : To_Target ;
+}
+
 ReflectionPoint Room::calcInitalReflectionPoint(Wall wall)
 {
 	switch (wall)
@@ -116,13 +123,11 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 	double sourceGradient = Point::calcGradient(source, reflPt);
 	double targetGradient = Point::calcGradient(target, reflPt);
 
-	Direction prevDir = (wall == Right || wall == Left) ?
-			abs(sourceGradient) > abs(targetGradient) ? To_Source : To_Target :
-			abs(sourceGradient) < abs(targetGradient) ? To_Source : To_Target ;
+	Direction prevDir = calcDirection(wall, sourceGradient, targetGradient);
 
 	int increment = (wall == Right || wall == Left) ?
-			abs(source.getYMillis() - target.getYMillis()) / 4 :
-			abs(source.getXMillis() - target.getXMillis()) / 4 ;
+			abs(source.getYMillis() - target.getYMillis()) / 5 :
+			abs(source.getXMillis() - target.getXMillis()) / 5 ;
 
 	while (abs(sourceGradient) != abs(targetGradient))
 	{
@@ -131,9 +136,7 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 		sourceGradient = Point::calcGradient(source, reflPt);
 		targetGradient = Point::calcGradient(target, reflPt);
 
-		Direction currDir = (wall == Right || wall == Left) ?
-				abs(sourceGradient) > abs(targetGradient) ? To_Source : To_Target :
-				abs(sourceGradient) < abs(targetGradient) ? To_Source : To_Target ;
+		Direction currDir = calcDirection(wall, sourceGradient, targetGradient);
 
 		if (prevDir != currDir)
 		{
@@ -146,8 +149,8 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 			}
 		}
 
-		cout << "Reflection point: " << reflPt;
-		cout << abs(abs(sourceGradient) - abs(targetGradient)) << " increment: " << increment << '\n';
+//		cout << "Reflection point: " << reflPt;
+//		cout << abs(abs(sourceGradient) - abs(targetGradient)) << " increment: " << increment << '\n';
 	}
 
 	if (sourceGradient == targetGradient)

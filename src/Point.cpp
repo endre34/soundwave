@@ -102,7 +102,7 @@ ostream& operator <<(ostream& out, const Point& point)
 double Point::calcGradient(const Point& p1, const Point& p2)
 {
 	double gr = (double)(p2.getYMillis() - p1.getYMillis()) / (p2.getXMillis() - p1.getXMillis());
-	return round_to_precision(gr, 3);
+	return round_to_precision(gr, 2);
 }
 
 

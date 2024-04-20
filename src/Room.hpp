@@ -47,6 +47,7 @@ private:
 		To_Target
 	};
 
+	Direction calcDirection(Wall wall, double sourceGradient, double targetGradient);
 	ReflectionPoint calcInitalReflectionPoint(Wall wall);
 	ReflectionPoint getNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP);
 };
