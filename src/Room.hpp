@@ -28,6 +28,7 @@ public:
 	void calcReflectionPoints();
 	void calcDistances();
 
+	int calcDistance(const Point& point1, const Point& point2);
 	ReflectionPoint calcReflectionPoint(Wall wall);
 
 private:
@@ -48,7 +49,7 @@ private:
 
 	double calcDir(const Point& p1, const Point& p2);
 
-	Point getInitalReflectionPoint(Wall wall);
+	ReflectionPoint getInitalReflectionPoint(Wall wall);
 	ReflectionPoint getNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP);
 };
 

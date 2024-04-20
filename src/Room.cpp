@@ -3,8 +3,6 @@
  *   Author: Endre
  */
 
-#include <iostream>
-#include <iomanip>
 #include <cmath>
 
 #include "Room.hpp"
@@ -44,21 +42,21 @@ double Room::calcDir(const Point& p1, const Point& p2)
 	return (p2.getYMeters() - p1.getYMeters()) / (p2.getXMeters() - p1.getXMeters());
 }
 
-Point Room::getInitalReflectionPoint(Wall wall)
+ReflectionPoint Room::getInitalReflectionPoint(Wall wall)
 {
 	switch (wall)
 	{
 	case Top:												// y = 0 && x variable
-		return Point((source.getXMillis() + target.getXMillis()) / 2, 0);
+		return ReflectionPoint((source.getXMillis() + target.getXMillis()) / 2, 0, wall);
 	case Bottom:											// y = sizeY && x variable
-		return Point((source.getXMillis() + target.getXMillis()) / 2, sizeY * 1000);
+		return ReflectionPoint((source.getXMillis() + target.getXMillis()) / 2, sizeY, wall);
 	case Left:												// y variable && x = 0
-		return Point(0, (source.getYMillis() + target.getYMillis()) / 2);
+		return ReflectionPoint(0, (source.getYMillis() + target.getYMillis()) / 2, wall);
 	case Right:												// y variable && x = sizeX
-		return Point(sizeX * 1000, (source.getYMillis() + target.getYMillis()) / 2);
+		return ReflectionPoint(sizeX, (source.getYMillis() + target.getYMillis()) / 2, wall);
 	default:
 		throw overflow_error("ERROR: no such value in enum");
-		return Point(-1, -1);
+		return ReflectionPoint(-1, -1, wall);
 	}
 }
 
@@ -82,7 +80,7 @@ ReflectionPoint Room::getNextReflectionPoint(Direction direction, int increment,
 	}
 }
 
-void Room::setSource(const Point& source)					// in meters
+void Room::setSource(const Point& source)
 {
 	this->source = source;
 }
@@ -92,7 +90,7 @@ Point Room::getSource()
 	return source;
 }
 
-void Room::setTarget(const Point& target)					// in meters
+void Room::setTarget(const Point& target)
 {
 	this->target = target;
 }
@@ -112,14 +110,14 @@ void Room::setSize(double sizeX, double sizeY)
 	this->sizeY = to_millis(sizeY);
 }
 
+int Room::calcDistance(const Point& point1, const Point& point2)
+{
+	return static_cast<int>(sqrt(pow(point2.getXMillis() - point1.getXMillis(), 2) + pow(point2.getYMillis() - point1.getYMillis(), 2)));
+}
+
 ReflectionPoint Room::calcReflectionPoint(Wall wall)
 {
-	ReflectionPoint reflPt;
-
-	{
-		Point point = getInitalReflectionPoint(wall);
-		reflPt = ReflectionPoint(point.getXMillis(), point.getYMillis(), wall);
-	}
+	ReflectionPoint reflPt = getInitalReflectionPoint(wall);
 
 	int increment = wall == Right || wall == Left ? 		// set effective increment
 			abs(source.getYMillis() - target.getYMillis()) / 3 :
@@ -139,12 +137,6 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 		dir_fromSource = calcDir(source, reflPt);
 		dir_fromTarget = calcDir(target, reflPt);
 	}
-
-//	cout << "RP: ";
-//	reflectionP.out();
-//	cout << "Pitch: " << dir_fromSource << ' ' << dir_fromTarget << setprecision(5) << endl;
-//
-//	cout << dir_fromSource << endl;
 
 	Direction originalDirection = abs(dir_fromSource) < abs(dir_fromTarget) ? To_Source : To_Target;
 	while (abs(dir_fromSource) != abs(dir_fromTarget))
@@ -171,11 +163,6 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 			dir_fromSource = calcDir(source, reflPt);
 			dir_fromTarget = calcDir(target, reflPt);
 		}
-
-//		cout << "RP: ";
-//		reflectionP.out();
-//		cout << "Pitch: " << dir_fromSource << ' ' << dir_fromTarget << setprecision(5) << endl;
-//		cout << "Increment: " << increment << endl;
 	}
 
 	if (dir_fromSource == dir_fromTarget)
@@ -206,13 +193,12 @@ void Room::calcDistances()
 	{
 		for (int i = 0; i < (int)reflectionPoints.size(); ++i)
 		{
-			distances.emplace_back(sqrt(pow(reflectionPoints[i].getXMillis() - source.getXMillis(), 2) + pow(reflectionPoints[i].getYMillis() - source.getYMillis(), 2))
-					+ sqrt((pow(target.getXMillis() - reflectionPoints[i].getXMillis(), 2) + pow(target.getYMillis() - reflectionPoints[i].getYMillis(), 2))));
+			distances.push_back(calcDistance(reflectionPoints[i], source) + calcDistance(target, reflectionPoints[i]));
 
 			cout << "Distance of [" << i << "]: " << distances[i] << " mm" << endl;
 		}
 
-		distances.emplace_back(sqrt((pow(target.getXMillis() - source.getXMillis(), 2) + pow(target.getYMillis() - source.getYMillis(), 2))));
+		distances.push_back(calcDistance(source, target));
 
 		cout << "Distance of [direct]: " << distances.back() << " mm" << endl;
 	}
