@@ -20,7 +20,7 @@ int main()
 	room.setSource(Point(4.3, 4.8));
 	room.setTarget(Point(9.1, 8.7));
 	room.calcReflectionPoints();
-	//room.calcDistances();
+	room.calcDistances();
 
 	DrawRoom droom(room);
     return 0;

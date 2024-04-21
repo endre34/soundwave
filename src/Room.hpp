@@ -11,7 +11,7 @@
 #include "Point.hpp"
 
 
-class Room										// Mi az amplitudo es az ido???
+class Room
 {
 public:
 	Room(double sizeX, double sizeY);
@@ -28,7 +28,6 @@ public:
 	void calcReflectionPoints();
 	void calcDistances();
 
-	int calcDistance(const Point& point1, const Point& point2);
 	ReflectionPoint calcReflectionPoint(Wall wall);
 
 private:
@@ -43,13 +42,14 @@ private:
 
 	enum Direction
 	{
-		To_Source,
-		To_Target
+		TOWARD_SOURCE,
+		TOWARD_TARGET
 	};
+	std::string to_string(Direction dir);
 
 	Direction calcDirection(Wall wall, double sourceGradient, double targetGradient);
 	ReflectionPoint calcInitalReflectionPoint(Wall wall);
-	ReflectionPoint getNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP);
+	ReflectionPoint calcNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP);
 };
 
 

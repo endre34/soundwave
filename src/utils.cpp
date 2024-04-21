@@ -16,10 +16,10 @@ double round_to_precision(double value, int decimal_places)
 
 int to_millis(double meters)
 {
-	return static_cast<int>(meters * 1000.0);
+	return meters * 1000.0;
 }
 
 double to_meters(int millis)
 {
-	return static_cast<double>(millis) / 1000.0;
+	return millis / 1000.0;
 }

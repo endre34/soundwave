@@ -4,6 +4,7 @@
  */
 
 #include <cmath>
+#include <iomanip>
 
 #include "Room.hpp"
 #include "utils.hpp"
@@ -37,11 +38,26 @@ Room::Room() :
 	// empty
 }
 
+string Room::to_string(Direction dir)
+{
+	switch (dir)
+	{
+	case TOWARD_SOURCE:
+		return "TOWARD_SOURCE";
+	case TOWARD_TARGET:
+		return "TOWARD_TARGET";
+	default:
+		throw runtime_error("Unrecognized direction");
+	}
+
+
+}
+
 Room::Direction Room::calcDirection(Wall wall, double sourceGradient, double targetGradient)
 {
 	return (wall == Right || wall == Left) ?
-			abs(sourceGradient) > abs(targetGradient) ? To_Source : To_Target :
-			abs(sourceGradient) < abs(targetGradient) ? To_Source : To_Target ;
+			abs(sourceGradient) > abs(targetGradient) ? TOWARD_SOURCE : TOWARD_TARGET :
+			abs(sourceGradient) < abs(targetGradient) ? TOWARD_SOURCE : TOWARD_TARGET ;
 }
 
 ReflectionPoint Room::calcInitalReflectionPoint(Wall wall)
@@ -61,11 +77,11 @@ ReflectionPoint Room::calcInitalReflectionPoint(Wall wall)
 	}
 }
 
-ReflectionPoint Room::getNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP)
+ReflectionPoint Room::calcNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP)
 {
 	if (reflectionP.getWall() == Right || reflectionP.getWall() == Left)
 	{
-		int y = direction == To_Source ?
+		int y = direction == TOWARD_SOURCE ?
 				reflectionP.getYMillis() + (source.getYMillis() - target.getYMillis()) / abs(source.getYMillis() - target.getYMillis()) * increment :
 				reflectionP.getYMillis() + (target.getYMillis() - source.getYMillis()) / abs(target.getYMillis() - source.getYMillis()) * increment ;
 
@@ -73,7 +89,7 @@ ReflectionPoint Room::getNextReflectionPoint(Direction direction, int increment,
 	}
 	else
 	{
-		int x = direction == To_Source ?
+		int x = direction == TOWARD_SOURCE ?
 				reflectionP.getXMillis() + (source.getXMillis() - target.getXMillis()) / abs(source.getXMillis() - target.getXMillis()) * increment :
 				reflectionP.getXMillis() + (target.getXMillis() - source.getXMillis()) / abs(target.getXMillis() - source.getXMillis()) * increment ;
 
@@ -111,11 +127,6 @@ void Room::setSize(double sizeX, double sizeY)
 	this->sizeY = to_millis(sizeY);
 }
 
-int Room::calcDistance(const Point& point1, const Point& point2)
-{
-	return static_cast<int>(sqrt(pow(point2.getXMillis() - point1.getXMillis(), 2) + pow(point2.getYMillis() - point1.getYMillis(), 2)));
-}
-
 ReflectionPoint Room::calcReflectionPoint(Wall wall)
 {
 	ReflectionPoint reflPt = calcInitalReflectionPoint(wall);
@@ -131,7 +142,7 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 
 	while (abs(sourceGradient) != abs(targetGradient))
 	{
-		reflPt = getNextReflectionPoint(prevDir, increment, reflPt);
+		reflPt = calcNextReflectionPoint(prevDir, increment, reflPt);
 
 		sourceGradient = Point::calcGradient(source, reflPt);
 		targetGradient = Point::calcGradient(target, reflPt);
@@ -148,9 +159,9 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 				break;
 			}
 		}
-
-//		cout << "Reflection point: " << reflPt;
-//		cout << abs(abs(sourceGradient) - abs(targetGradient)) << " increment: " << increment << '\n';
+//		cout << "refl pt: " << reflPt
+//				<< ", dir: " << to_string(currDir)
+//				<< ", incr: " << increment << '\n';
 	}
 
 	if (sourceGradient == targetGradient)
@@ -182,23 +193,16 @@ void Room::calcDistances()
 {
 	distances.clear();
 
-	if ((int)reflectionPoints.size() != 0)
+	cout << fixed << setprecision(3) << setfill(' ');
+	for (auto reflPt : reflectionPoints)
 	{
-		for (int i = 0; i < (int)reflectionPoints.size(); ++i)
-		{
-			distances.push_back(calcDistance(reflectionPoints[i], source) + calcDistance(target, reflectionPoints[i]));
+		distances.push_back(Point::calcDistance(source, reflPt) + Point::calcDistance(reflPt, target));
 
-			cout << "Distance of [" << i << "]: " << distances[i] << " mm" << endl;
-		}
-
-		distances.push_back(calcDistance(source, target));
-
-		cout << "Distance of [direct]: " << distances.back() << " mm" << endl;
+		cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
 	}
-	else
-	{
-		throw overflow_error("No reflection points");
-	}
+
+	distances.push_back(Point::calcDistance(source, target));
+	cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
 }
 
 
