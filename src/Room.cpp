@@ -56,8 +56,8 @@ string Room::to_string(Direction dir)
 Room::Direction Room::calcDirection(Wall wall, double sourceGradient, double targetGradient)
 {
 	return (wall == Right || wall == Left) ?
-			abs(sourceGradient) > abs(targetGradient) ? TOWARD_SOURCE : TOWARD_TARGET :
-			abs(sourceGradient) < abs(targetGradient) ? TOWARD_SOURCE : TOWARD_TARGET ;
+			(abs(sourceGradient) > abs(targetGradient) ? TOWARD_SOURCE : TOWARD_TARGET) :
+			(abs(sourceGradient) < abs(targetGradient) ? TOWARD_SOURCE : TOWARD_TARGET) ;
 }
 
 ReflectionPoint Room::calcInitalReflectionPoint(Wall wall)
@@ -65,13 +65,13 @@ ReflectionPoint Room::calcInitalReflectionPoint(Wall wall)
 	switch (wall)
 	{
 	case Top:
-		return ReflectionPoint((source.getXMillis() + target.getXMillis()) / 2, 0, wall);
+		return ReflectionPoint((source.getX() + target.getX()) / 2, 0, wall);
 	case Bottom:
-		return ReflectionPoint((source.getXMillis() + target.getXMillis()) / 2, sizeY, wall);
+		return ReflectionPoint((source.getX() + target.getX()) / 2, sizeY, wall);
 	case Left:
-		return ReflectionPoint(0, (source.getYMillis() + target.getYMillis()) / 2, wall);
+		return ReflectionPoint(0, (source.getY() + target.getY()) / 2, wall);
 	case Right:
-		return ReflectionPoint(sizeX, (source.getYMillis() + target.getYMillis()) / 2, wall);
+		return ReflectionPoint(sizeX, (source.getY() + target.getY()) / 2, wall);
 	default:
 		throw runtime_error("Unrecognized wall");
 	}
@@ -82,18 +82,18 @@ ReflectionPoint Room::calcNextReflectionPoint(Direction direction, int increment
 	if (reflectionP.getWall() == Right || reflectionP.getWall() == Left)
 	{
 		int y = direction == TOWARD_SOURCE ?
-				reflectionP.getYMillis() + (source.getYMillis() - target.getYMillis()) / abs(source.getYMillis() - target.getYMillis()) * increment :
-				reflectionP.getYMillis() + (target.getYMillis() - source.getYMillis()) / abs(target.getYMillis() - source.getYMillis()) * increment ;
+				reflectionP.getY() + (source.getY() - target.getY()) / abs(source.getY() - target.getY()) * increment :
+				reflectionP.getY() + (target.getY() - source.getY()) / abs(target.getY() - source.getY()) * increment ;
 
-		return ReflectionPoint(reflectionP.getXMillis(), y, reflectionP.getWall());
+		return ReflectionPoint(reflectionP.getX(), y, reflectionP.getWall());
 	}
 	else
 	{
 		int x = direction == TOWARD_SOURCE ?
-				reflectionP.getXMillis() + (source.getXMillis() - target.getXMillis()) / abs(source.getXMillis() - target.getXMillis()) * increment :
-				reflectionP.getXMillis() + (target.getXMillis() - source.getXMillis()) / abs(target.getXMillis() - source.getXMillis()) * increment ;
+				reflectionP.getX() + (source.getX() - target.getX()) / abs(source.getX() - target.getX()) * increment :
+				reflectionP.getX() + (target.getX() - source.getX()) / abs(target.getX() - source.getX()) * increment ;
 
-		return ReflectionPoint(x, reflectionP.getYMillis(), reflectionP.getWall());
+		return ReflectionPoint(x, reflectionP.getY(), reflectionP.getWall());
 	}
 }
 
@@ -132,20 +132,21 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 	ReflectionPoint reflPt = calcInitalReflectionPoint(wall);
 
 	double sourceGradient = Point::calcGradient(source, reflPt);
-	double targetGradient = Point::calcGradient(target, reflPt);
+	double targetGradient = Point::calcGradient(reflPt, target);
 
 	Direction prevDir = calcDirection(wall, sourceGradient, targetGradient);
 
+	// Muszaly 4 legyen maskent atszokik a target-en
 	int increment = (wall == Right || wall == Left) ?
-			abs(source.getYMillis() - target.getYMillis()) / 5 :
-			abs(source.getXMillis() - target.getXMillis()) / 5 ;
+			abs(source.getY() - target.getY()) / 4 :
+			abs(source.getX() - target.getX()) / 4 ;
 
 	while (abs(sourceGradient) != abs(targetGradient))
 	{
 		reflPt = calcNextReflectionPoint(prevDir, increment, reflPt);
 
 		sourceGradient = Point::calcGradient(source, reflPt);
-		targetGradient = Point::calcGradient(target, reflPt);
+		targetGradient = Point::calcGradient(reflPt, target);
 
 		Direction currDir = calcDirection(wall, sourceGradient, targetGradient);
 
@@ -159,9 +160,9 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 				break;
 			}
 		}
-//		cout << "refl pt: " << reflPt
-//				<< ", dir: " << to_string(currDir)
-//				<< ", incr: " << increment << '\n';
+		cout << "refl pt: " << reflPt
+				<< ", next: " << to_string(currDir)
+				<< ", incr: " << increment << '\n';
 	}
 
 	if (sourceGradient == targetGradient)

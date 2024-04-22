@@ -71,12 +71,12 @@ void Point::setY(int y)
 	this->y = y;
 }
 
-int Point::getXMillis() const
+int Point::getX() const
 {
 	return x;
 }
 
-int Point::getYMillis() const
+int Point::getY() const
 {
 	return y;
 }

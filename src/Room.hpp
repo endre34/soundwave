@@ -30,6 +30,8 @@ public:
 
 	ReflectionPoint calcReflectionPoint(Wall wall);
 
+	friend class DrawRoom;
+
 private:
 	int sizeX, sizeY;
 	Point source, target;

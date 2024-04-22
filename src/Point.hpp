@@ -32,8 +32,8 @@ public:
 	void setX(int x);
 	void setY(int y);
 
-	int getXMillis() const;
-	int getYMillis() const;
+	int getX() const;
+	int getY() const;
 
 	double getXMeters() const;
 	double getYMeters() const;
