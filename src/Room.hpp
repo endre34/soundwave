@@ -27,6 +27,7 @@ public:
 
 	void calcReflectionPoints();
 	void calcDistances();
+	void calcKiteresek();
 
 	ReflectionPoint calcReflectionPoint(Wall wall);
 
@@ -38,9 +39,13 @@ private:
 	std::vector<ReflectionPoint> reflectionPoints;
 
 	std::vector<int> distances;
+	std::vector<double> kiteresek;
 
-	int waveleght;
-	double period;
+	// terjedesi sebesseg: 343.5
+	// levego surusege: 1.2045
+	const int SPL = 70;		// @ 1m from source
+	int waveleght, frequency;
+	double period, maxAmplitude, kiteres;
 
 	enum Direction
 	{

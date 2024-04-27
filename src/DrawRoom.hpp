@@ -10,22 +10,36 @@
 #include <vector>
 
 #include "Room.hpp"
+#include "Arrow.hpp"
 
 
 class DrawRoom : public sf::Drawable, public sf::Transformable
 {
 public:
-	DrawRoom(const Room& room);
-	~DrawRoom();
+	DrawRoom(Room& room);
+
+	void setSize(int x);
+	sf::Vector2u getSize();
+	sf::Vector2u getWindowSize();
+
+	void calcTransformRatio();
+
+	void createPoints();
+	void createWaveDir();
 
 	void out();
 
 private:
-	Room* room;
+	Room& room;
+
+	int sizeX, sizeY;
+	double ratio;			// from millis to pixels
 
 	sf::RectangleShape bounds;
 	std::vector<sf::CircleShape> points;
+	std::vector<Arrow> waveDirections;
 
+	double millisToPixels(int millis);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 };

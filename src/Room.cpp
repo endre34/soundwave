@@ -14,7 +14,10 @@ using namespace std;
 
 Room::Room(double sizeX, double sizeY) :
 		waveleght { 0 },
-		period { 0 }
+		frequency { 0 },
+		period { 0 },
+		maxAmplitude { 0 },
+		kiteres { 0 }
 {
 	this->sizeX = to_millis(sizeX);
 	this->sizeY = to_millis(sizeY);
@@ -24,7 +27,10 @@ Room::Room(const Room& room) :
 		sizeX { room.sizeX },
 		sizeY { room.sizeY },
 		waveleght { room.waveleght },
-		period { room.period }
+		frequency { room.frequency },
+		period { room.period },
+		maxAmplitude { room.maxAmplitude },
+		kiteres { room.kiteres }
 {
 	// empty
 }
@@ -33,7 +39,10 @@ Room::Room() :
 		sizeX { 0 },
 		sizeY { 0 },
 		waveleght { 0 },
-		period { 0 }
+		frequency { 0 },
+		period { 0 },
+		maxAmplitude { 0 },
+		kiteres { 0 }
 {
 	// empty
 }
@@ -114,11 +123,13 @@ void Room::setTarget(const Point& target)
 
 void Room::setParams(int freq)
 {
+	frequency = freq;
 	period = 1.0 / (double)freq;
-	waveleght = round(340000.0 * period);
+	waveleght = round(343500.0 * period);
+	maxAmplitude = sqrt(pow(10, -12 + SPL / 10 + 6) / (2 * pow(M_PI, 2) * 1.2045 * 343.5 * pow(freq, 2)));
 
-	cout << "Periodus: " << period * 1000 << " ms" << endl;
-	cout << "Hullamhossz: " << waveleght << " mm" << endl;
+//	cout << fixed << setprecision(5);
+//	cout << "maxampl: " << maxAmplitude << " mm" << endl;
 }
 
 void Room::setSize(double sizeX, double sizeY)
@@ -195,15 +206,37 @@ void Room::calcDistances()
 	distances.clear();
 
 	cout << fixed << setprecision(3) << setfill(' ');
+
+	distances.push_back(Point::calcDistance(source, target));
+	cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
+
 	for (auto reflPt : reflectionPoints)
 	{
 		distances.push_back(Point::calcDistance(source, reflPt) + Point::calcDistance(reflPt, target));
 
 		cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
 	}
+}
 
-	distances.push_back(Point::calcDistance(source, target));
-	cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
+void Room::calcKiteresek()
+{
+	cout << fixed << setprecision(10);
+	{
+		double intensity = pow(10, -12 + (double)SPL / 10) / pow(to_meters(distances.front()), 2);
+		double time = distances.front() / 343.5;
+		double amplitude = sqrt(intensity / (2 * pow(M_PI, 2) * 1.2045 * 343.5 * pow(frequency, 2)));
+		kiteresek.push_back(amplitude * sin(2 * M_PI * (time / period - distances.front() / waveleght)));
+		cout << kiteresek.back() << endl;
+	}
+
+	for (int i = 1; i < (int)distances.size(); ++i)
+	{
+		double intensity = pow(10, -12 + (double)SPL / 10) / pow(to_meters(distances[i]), 2);
+		double time = distances[i] / 343.5;
+		double amplitude = sqrt(intensity * pow(10, 6) / (2 * pow(M_PI, 2) * 1.2045 * 343.5 * pow(frequency, 2)));
+		kiteresek.push_back(amplitude * sin(2 * M_PI * (time / period - (distances[i] + waveleght / 2) / waveleght)));
+		cout << kiteresek.back() << endl;
+	}
 }
 
 
