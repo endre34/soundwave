@@ -17,7 +17,7 @@ using namespace sf;
 int main()
 {
 	Room room(5.6, 6.5);
-	room.setSource(Point(1.0, 2.6));
+	room.setSource(Point(1.54, 2.3));
 	room.setTarget(Point(3.7, 4.0));
 	room.calcReflectionPoints();
 	room.calcDistances();
@@ -32,8 +32,6 @@ int main()
 
 	RenderWindow window(VideoMode(dRoom.getWindowSize().x, dRoom.getWindowSize().y), "test1");
 	window.setFramerateLimit(1);
-
-//	window.setSize(dRoom.getWindowSize());
 
 	while (window.isOpen())
 	{

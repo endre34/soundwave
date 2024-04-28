@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <unistd.h>
+#include <cmath>
 
 #include "DrawRoom.hpp"
 #include "utils.hpp"
@@ -67,52 +68,66 @@ void DrawRoom::calcTransformRatio()
 
 void DrawRoom::createPoints()
 {
-	// source
-	points.push_back(CircleShape(10));
-	points.back().setFillColor(Color::Green);
-	{
-	auto bounds = points.back().getLocalBounds();
-	points.back().setOrigin(bounds.width / 2, bounds.height / 2);
-
 	auto origin = this->bounds.getPosition();
-	points.back().setPosition(Vector2f(origin.x + millisToPixels(room.source.getX()),
-			origin .y + millisToPixels(room.source.getY())));
+
+	// source
+	points.push_back(VertexArray(TriangleFan, 32));
+
+	for (int i = 0; i < (int)points.back().getVertexCount(); ++i)
+	{
+		points.back()[i].color = Color::Green;
+	}
+	points.back()[0].position = Vector2f(origin.x + millisToPixels(room.source.getX()),
+			origin.y + millisToPixels(room.source.getY()));
+
+	for (int i = 1; i < (int)points.back().getVertexCount(); ++i)
+	{
+		double angle = 12 * (i - 1) * M_PI / (double)180;
+		points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * 10,
+											points.back()[0].position.y + sin(angle) * 10);
 	}
 
-	// target
-	points.push_back(CircleShape(10));
-	points.back().setFillColor(Color::Red);
-	{
-	auto bounds = points.back().getLocalBounds();
-	points.back().setOrigin(bounds.width / 2, bounds.height / 2);
 
-	auto origin = this->bounds.getPosition();
-	points.back().setPosition(Vector2f(origin.x + millisToPixels(room.target.getX()),
-			origin.y + millisToPixels(room.target.getY())));
+	// target
+	points.push_back(VertexArray(TriangleFan, 32));
+
+	for (int i = 0; i < (int)points.back().getVertexCount(); ++i)
+	{
+		points.back()[i].color = Color::Red;
+	}
+	points.back()[0].position = Vector2f(origin.x + millisToPixels(room.target.getX()),
+			origin.y + millisToPixels(room.target.getY()));
+
+	for (int i = 1; i < (int)points.back().getVertexCount(); ++i)
+	{
+		double angle = 12 * (i) * M_PI / (double)180;
+		points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * 10,
+											points.back()[0].position.y + sin(angle) * 10);
 	}
 
 	// reflection points
-	for (auto i : room.reflectionPoints)
+	for (ReflectionPoint rp : room.reflectionPoints)
 	{
-		points.emplace_back(CircleShape(7));
-		points.back().setFillColor(Color::Yellow);
+		points.push_back(VertexArray(TriangleFan, 17));
 
-		auto bounds = points.back().getLocalBounds();
-		points.back().setOrigin(bounds.width / 2, bounds.height / 2);
+		for (int i = 0; i < (int)points.back().getVertexCount(); ++i)
+		{
+			points.back()[i].color = Color::Cyan;
+		}
+		points.back()[0].position = Vector2f(origin.x + millisToPixels(rp.getX()),
+				origin.y + millisToPixels(rp.getY()));
 
-		auto origin = this->bounds.getPosition();
-		points.back().setPosition(origin.x + millisToPixels(i.getX()), origin.y + millisToPixels(i.getY()));
+		for (int i = 1; i < (int)points.back().getVertexCount(); ++i)
+		{
+			double angle = (startAngle(rp.getWall()) + 12 * (i - 1)) * M_PI / (double)180;
+			points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * 10,
+												points.back()[0].position.y + sin(angle) * 10);
+		}
 	}
 }
 
 void DrawRoom::createWaveDir()
 {
-	for (auto i : points)
-	{
-		waveDirections.emplace_back(room.source, Point(i.getPosition().x, i.getPosition().y), ratio);
-		waveDirections.emplace_back(Point(i.getPosition().x, i.getPosition().y), room.target, ratio);
-	}
-	waveDirections.emplace_back(room.source, room.target, ratio);
 }
 
 double DrawRoom::millisToPixels(int millis)
@@ -138,3 +153,27 @@ void DrawRoom::draw(RenderTarget& target, RenderStates states) const
 		target.draw(i);
 	}
 }
+
+int DrawRoom::startAngle(Wall wall)
+{
+	switch (wall)
+	{
+	case Top:
+		return 0;
+	case Bottom:
+		return 180;
+	case Left:
+		return -90;
+	case Right:
+		return 90;
+	default:
+		throw runtime_error("Unrecognized wall");
+	}
+}
+
+
+
+
+
+
+
