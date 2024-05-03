@@ -68,7 +68,11 @@ void DrawRoom::calcTransformRatio()
 
 void DrawRoom::createPoints()
 {
-	auto origin = this->bounds.getPosition();
+	points.clear();
+
+	auto origin = bounds.getPosition();
+	double rpSize = 10;
+	double stSize = 15;
 
 	// source
 	points.push_back(VertexArray(TriangleFan, 32));
@@ -83,8 +87,8 @@ void DrawRoom::createPoints()
 	for (int i = 1; i < (int)points.back().getVertexCount(); ++i)
 	{
 		double angle = 12 * (i - 1) * M_PI / (double)180;
-		points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * 10,
-											points.back()[0].position.y + sin(angle) * 10);
+		points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * stSize,
+											points.back()[0].position.y + sin(angle) * stSize);
 	}
 
 
@@ -101,12 +105,12 @@ void DrawRoom::createPoints()
 	for (int i = 1; i < (int)points.back().getVertexCount(); ++i)
 	{
 		double angle = 12 * (i) * M_PI / (double)180;
-		points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * 10,
-											points.back()[0].position.y + sin(angle) * 10);
+		points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * stSize,
+											points.back()[0].position.y + sin(angle) * stSize);
 	}
 
 	// reflection points
-	for (ReflectionPoint rp : room.reflectionPoints)
+	for (auto rp : room.reflectionPoints)
 	{
 		points.push_back(VertexArray(TriangleFan, 17));
 
@@ -120,14 +124,24 @@ void DrawRoom::createPoints()
 		for (int i = 1; i < (int)points.back().getVertexCount(); ++i)
 		{
 			double angle = (startAngle(rp.getWall()) + 12 * (i - 1)) * M_PI / (double)180;
-			points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * 10,
-												points.back()[0].position.y + sin(angle) * 10);
+			points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * rpSize,
+												points.back()[0].position.y + sin(angle) * rpSize);
 		}
 	}
 }
 
 void DrawRoom::createWaveDir()
 {
+	waveDirections.clear();
+
+	VertexArray source = points[0];
+	VertexArray target = points[1];
+	for (int i = 2; i < (int)points.size(); ++i)
+	{
+		waveDirections.emplace_back(source[0].position, points[i][0].position);
+		waveDirections.emplace_back(points[i][0].position, target[0].position);
+	}
+	waveDirections.emplace_back(source[0].position, target[0].position);
 }
 
 double DrawRoom::millisToPixels(int millis)

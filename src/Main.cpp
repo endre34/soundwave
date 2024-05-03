@@ -16,9 +16,9 @@ using namespace sf;
 
 int main()
 {
-	Room room(5.6, 6.5);
-	room.setSource(Point(1.54, 2.3));
-	room.setTarget(Point(3.7, 4.0));
+	Room room(5.6, 6.0);
+	room.setSource(Point(2.7, 3.0));
+	room.setTarget(Point(0.4, 5.0));
 	room.calcReflectionPoints();
 	room.calcDistances();
 	//room.setParams(57);
@@ -30,7 +30,7 @@ int main()
 	dRoom.createPoints();
 	dRoom.createWaveDir();
 
-	RenderWindow window(VideoMode(dRoom.getWindowSize().x, dRoom.getWindowSize().y), "test1");
+	RenderWindow window(VideoMode(dRoom.getWindowSize().x, dRoom.getWindowSize().y), "Hanginterferencia modellezese");
 	window.setFramerateLimit(1);
 
 	while (window.isOpen())

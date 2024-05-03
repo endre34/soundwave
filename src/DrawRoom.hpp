@@ -39,8 +39,9 @@ private:
 	std::vector<sf::VertexArray> points;
 	std::vector<Arrow> waveDirections;
 
-	double millisToPixels(int millis);
+
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+	double millisToPixels(int millis);
 	int startAngle(Wall wall);
 
 };

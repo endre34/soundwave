@@ -109,6 +109,13 @@ double Point::calcGradient(const Point& p1, const Point& p2)
 	return round_to_precision(gr, 2);
 }
 
+double Point::calcGradientPrecise(const Point& p1, const Point& p2)
+{
+	double y = (double)(p2.y - p1.y);
+	int x = p2.x - p1.x;
+	return y / x;
+}
+
 int Point::calcDistance(const Point& p1, const Point& p2)
 {
 	return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));

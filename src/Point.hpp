@@ -43,6 +43,7 @@ public:
 	friend std::ostream& operator <<(std::ostream& out, const Point& point);
 
 	static double calcGradient(const Point& p1, const Point& p2);
+	static double calcGradientPrecise(const Point& p1, const Point& p2);
 	static int calcDistance(const Point& p1, const Point& p2);
 
 private:
