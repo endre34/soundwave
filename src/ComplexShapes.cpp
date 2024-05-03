@@ -7,7 +7,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "Arrow.hpp"
+#include "ComplexShapes.hpp"
 #include "Point.hpp"
 #include "utils.hpp"
 
@@ -24,22 +24,14 @@ Arrow::Arrow(const Vector2f& point1,const Vector2f& point2)
 	double size = sqrt(pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2));
 	line.setSize(Vector2f(size, 3));
 
-	cout << "Size: x: " << line.getSize().x << ", y: " << line.getSize().y << endl;
-
 	line.setOrigin(0, line.getLocalBounds().height / 2);
 
 	line.setPosition(point1);
 
-	cout << "Position: x: " << line.getPosition().x << ", y: " << line.getPosition().y << endl;
-
 	double angle = get_angle(point1, point2);
 	line.setRotation(angle);
 
-	cout << "Rotation: " << line.getRotation() << endl;
-
-	line.setFillColor(Color::Black);
-
-	cout << endl;
+	line.setFillColor(Color(75, 75, 75));
 
 //	########################	HEAD	##############################################
 	head.setFillColor(Color::Black);
@@ -72,6 +64,58 @@ double Arrow::get_angle(const sf::Vector2f& point1,const sf::Vector2f& point2)
 
 	return angle;
 }
+
+Target::Target()
+{
+	// empty
+}
+
+Target::Target(const Vector2f& position, const sf::CircleShape& source)
+{
+	inner.setRadius(source.getRadius() * 2 / 3);
+	inner.setFillColor(source.getFillColor());
+	inner.setOrigin(inner.getRadius(), inner.getRadius());
+	inner.setPosition(position);
+
+	outer.setRadius(source.getRadius());
+	outer.setFillColor(Color::White);
+	outer.setOrigin(outer.getRadius(), outer.getRadius());
+	outer.setPosition(position);
+	outer.setOutlineColor(source.getFillColor());
+	outer.setOutlineThickness(-source.getRadius() / 6);
+}
+
+void Target::setTarget(const Vector2f& position, const sf::CircleShape& source)
+{
+	inner.setRadius(source.getRadius() * 2 / 3);
+	inner.setFillColor(source.getFillColor());
+	inner.setOrigin(inner.getRadius(), inner.getRadius());
+	inner.setPosition(position);
+
+	outer.setRadius(source.getRadius());
+	outer.setFillColor(Color::White);
+	outer.setOrigin(outer.getRadius(), outer.getRadius());
+	outer.setPosition(position);
+	outer.setOutlineColor(source.getFillColor());
+	outer.setOutlineThickness(-source.getRadius() / 6);
+}
+
+Vector2f Target::getPosition()
+{
+	return inner.getPosition();
+}
+
+void Target::draw(RenderTarget& target, RenderStates states) const
+{
+	states.transform *= getTransform();
+
+	states.texture = nullptr;
+
+	target.draw(outer, states);
+	target.draw(inner, states);
+}
+
+
 
 
 

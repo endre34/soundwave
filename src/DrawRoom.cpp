@@ -17,11 +17,10 @@ using namespace sf;
 
 DrawRoom::DrawRoom(Room& r):
 		room(r),
-		sizeX { 0 },
-		sizeY { 0 },
+		extension { 25 },
 		ratio { 1 }
 {
-	bounds.setPosition(Vector2f(50, 50));
+	bounds.setPosition(Vector2f(extension, extension));
 	bounds.getPosition();
 	bounds.setFillColor(Color::White);
 	bounds.setOutlineColor(Color::Blue);
@@ -34,30 +33,25 @@ void DrawRoom::setSize(int x)
 {
 	double ratio = (double)room.sizeX / room.sizeY;
 
-	this->sizeX = x;
-	this->sizeY = x / ratio;
-
 	bounds.setSize(Vector2f(x, x / ratio));
 
-	if (bounds.getSize().y > 900)
+	int maxY = 900 - extension * 2;
+	if (bounds.getSize().y > maxY)
 	{
-		this->sizeX = 900 * ratio;
-		this->sizeY = 900;
-
-		bounds.setSize(Vector2f(900 * ratio, 900));
+		bounds.setSize(Vector2f(maxY * ratio, maxY));
 	}
 }
 
-Vector2u DrawRoom::getSize()
+Vector2u DrawRoom::getRoomSize()
 {
 	return Vector2u(bounds.getSize());
 }
 
-Vector2u DrawRoom::getWindowSize()
+Vector2u DrawRoom::getVisualizationSize()
 {
 	Vector2u v2u(bounds.getSize());
-	v2u.x += 100;
-	v2u.y += 100;
+	v2u.x += extension * 2;
+	v2u.y += extension * 2;
 	return v2u;
 }
 
@@ -68,64 +62,41 @@ void DrawRoom::calcTransformRatio()
 
 void DrawRoom::createPoints()
 {
-	points.clear();
+	reflectionPoints.clear();
 
 	auto origin = bounds.getPosition();
 	double rpSize = 10;
 	double stSize = 15;
 
 	// source
-	points.push_back(VertexArray(TriangleFan, 32));
-
-	for (int i = 0; i < (int)points.back().getVertexCount(); ++i)
-	{
-		points.back()[i].color = Color::Green;
-	}
-	points.back()[0].position = Vector2f(origin.x + millisToPixels(room.source.getX()),
+	source.setFillColor(Color(104, 216, 107));
+	source.setRadius(stSize);
+	source.setOrigin(stSize, stSize);
+	source.setPosition(origin.x + millisToPixels(room.source.getX()),
 			origin.y + millisToPixels(room.source.getY()));
-
-	for (int i = 1; i < (int)points.back().getVertexCount(); ++i)
-	{
-		double angle = 12 * (i - 1) * M_PI / (double)180;
-		points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * stSize,
-											points.back()[0].position.y + sin(angle) * stSize);
-	}
 
 
 	// target
-	points.push_back(VertexArray(TriangleFan, 32));
-
-	for (int i = 0; i < (int)points.back().getVertexCount(); ++i)
-	{
-		points.back()[i].color = Color::Red;
-	}
-	points.back()[0].position = Vector2f(origin.x + millisToPixels(room.target.getX()),
-			origin.y + millisToPixels(room.target.getY()));
-
-	for (int i = 1; i < (int)points.back().getVertexCount(); ++i)
-	{
-		double angle = 12 * (i) * M_PI / (double)180;
-		points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * stSize,
-											points.back()[0].position.y + sin(angle) * stSize);
-	}
+	target.setTarget(Vector2f(origin.x + millisToPixels(room.target.getX()),
+			origin.y + millisToPixels(room.target.getY())), source);
 
 	// reflection points
-	for (auto rp : room.reflectionPoints)
+	for (ReflectionPoint rp : room.reflectionPoints)
 	{
-		points.push_back(VertexArray(TriangleFan, 17));
+		reflectionPoints.push_back(VertexArray(TriangleFan, 17));
 
-		for (int i = 0; i < (int)points.back().getVertexCount(); ++i)
+		for (int i = 0; i < (int)reflectionPoints.back().getVertexCount(); ++i)
 		{
-			points.back()[i].color = Color::Cyan;
+			reflectionPoints.back()[i].color = Color::Cyan;
 		}
-		points.back()[0].position = Vector2f(origin.x + millisToPixels(rp.getX()),
+		reflectionPoints.back()[0].position = Vector2f(origin.x + millisToPixels(rp.getX()),
 				origin.y + millisToPixels(rp.getY()));
 
-		for (int i = 1; i < (int)points.back().getVertexCount(); ++i)
+		for (int i = 1; i < (int)reflectionPoints.back().getVertexCount(); ++i)
 		{
 			double angle = (startAngle(rp.getWall()) + 12 * (i - 1)) * M_PI / (double)180;
-			points.back()[i].position = Vector2f(points.back()[0].position.x + cos(angle) * rpSize,
-												points.back()[0].position.y + sin(angle) * rpSize);
+			reflectionPoints.back()[i].position = Vector2f(reflectionPoints.back()[0].position.x + cos(angle) * rpSize,
+												reflectionPoints.back()[0].position.y + sin(angle) * rpSize);
 		}
 	}
 }
@@ -134,14 +105,12 @@ void DrawRoom::createWaveDir()
 {
 	waveDirections.clear();
 
-	VertexArray source = points[0];
-	VertexArray target = points[1];
-	for (int i = 2; i < (int)points.size(); ++i)
+	for (int i = 0; i < (int)reflectionPoints.size(); ++i)
 	{
-		waveDirections.emplace_back(source[0].position, points[i][0].position);
-		waveDirections.emplace_back(points[i][0].position, target[0].position);
+		waveDirections.emplace_back(source.getPosition(), reflectionPoints[i][0].position);
+		waveDirections.emplace_back(reflectionPoints[i][0].position, target.getPosition());
 	}
-	waveDirections.emplace_back(source[0].position, target[0].position);
+	waveDirections.emplace_back(source.getPosition(), target.getPosition());
 }
 
 double DrawRoom::millisToPixels(int millis)
@@ -162,10 +131,13 @@ void DrawRoom::draw(RenderTarget& target, RenderStates states) const
 		target.draw(i);
 	}
 
-	for (auto i : points)
+	for (auto i : reflectionPoints)
 	{
 		target.draw(i);
 	}
+
+	target.draw(this->source, states);
+	target.draw(this->target, states);
 }
 
 int DrawRoom::startAngle(Wall wall)
@@ -183,6 +155,12 @@ int DrawRoom::startAngle(Wall wall)
 	default:
 		throw runtime_error("Unrecognized wall");
 	}
+}
+
+
+int DrawRoom::getExtension()
+{
+	return extension;
 }
 
 

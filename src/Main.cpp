@@ -30,8 +30,8 @@ int main()
 	dRoom.createPoints();
 	dRoom.createWaveDir();
 
-	RenderWindow window(VideoMode(dRoom.getWindowSize().x, dRoom.getWindowSize().y), "Hanginterferencia modellezese");
-	window.setFramerateLimit(1);
+	RenderWindow window(VideoMode(dRoom.getVisualizationSize().x, dRoom.getVisualizationSize().y), "Hanginterferencia modellezese");
+	window.setFramerateLimit(30);
 
 	while (window.isOpen())
 	{
@@ -45,12 +45,27 @@ int main()
 
 		    if (event.type == sf::Event::Resized)
 		    {
-		        sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+		    	dRoom.setSize(event.size.width - dRoom.getExtension() * 2);
+		    	dRoom.calcTransformRatio();
+		    	dRoom.createPoints();
+		    	dRoom.createWaveDir();
+
+//		    	cout << "Room: x: " << dRoom.getVisualizationSize().x << ", y: " <<  dRoom.getVisualizationSize().y << endl;
+//		    	cout << "Window: x: " << event.size.width << ", y: " <<  event.size.height << endl;
+//		    	cout << endl;
+
+
+		    	// viewport only works with actual window size
+//		        sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+//		        window.setView(sf::View(visibleArea));
+
+		    	window.setSize(dRoom.getVisualizationSize());
+		        sf::FloatRect visibleArea(0, 0, dRoom.getVisualizationSize().x, dRoom.getVisualizationSize().y);
 		        window.setView(sf::View(visibleArea));
 		    }
 		}
 
-		window.clear(Color::White);
+		window.clear(Color(245, 245, 245));
 		window.draw(dRoom);
 		window.display();
 	}

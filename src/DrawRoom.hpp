@@ -9,8 +9,8 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
+#include "ComplexShapes.hpp"
 #include "Room.hpp"
-#include "Arrow.hpp"
 
 
 class DrawRoom : public sf::Drawable, public sf::Transformable
@@ -19,24 +19,26 @@ public:
 	DrawRoom(Room& room);
 
 	void setSize(int x);
-	sf::Vector2u getSize();
-	sf::Vector2u getWindowSize();
+	sf::Vector2u getRoomSize();
+	sf::Vector2u getVisualizationSize();
 
 	void calcTransformRatio();
 
 	void createPoints();
 	void createWaveDir();
 
-	void out();
+	int getExtension();
 
 private:
 	Room& room;
 
-	int sizeX, sizeY;
+	int extension;
 	double ratio;			// from millis to pixels
 
 	sf::RectangleShape bounds;
-	std::vector<sf::VertexArray> points;
+	sf::CircleShape source;
+	Target target;
+	std::vector<sf::VertexArray> reflectionPoints;
 	std::vector<Arrow> waveDirections;
 
 
