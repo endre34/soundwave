@@ -42,7 +42,14 @@ Arrow::Arrow(const Vector2f& point1,const Vector2f& point2)
 	head.setRotation(angle + 90);
 }
 
-void Arrow::draw(sf::RenderTarget& target, sf::RenderStates states) const
+void Arrow::enable()
+{
+	line.setFillColor(Color::Transparent);
+
+	head.setFillColor(Color::Transparent);
+}
+
+void Arrow::draw(RenderTarget& target, RenderStates states) const
 {
 	states.transform *= getTransform();
 
@@ -53,6 +60,70 @@ void Arrow::draw(sf::RenderTarget& target, sf::RenderStates states) const
 }
 
 double Arrow::get_angle(const sf::Vector2f& point1,const sf::Vector2f& point2)
+{
+	double gradient = Point::calcGradientPrecise(Point(point1.x, point1.y), Point(point2.x, point2.y));
+	double angle = atan(gradient) * 180.0 / M_PI;
+
+	if (point2.x - point1.x < 0)
+	{
+		angle += 180.0;
+	}
+
+	return angle;
+}
+
+DoubleHeadedArrow::DoubleHeadedArrow()
+{
+	// empty
+}
+
+DoubleHeadedArrow::DoubleHeadedArrow(const sf::Vector2f& point1,const sf::Vector2f& point2)
+{
+//	################################	line	#####################################
+
+	double size = sqrt(pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2));
+	line.setSize(Vector2f(size, 3));
+
+	line.setOrigin(0, line.getLocalBounds().height / 2);
+
+	line.setPosition(point1);
+
+	double angle = get_angle(point1, point2);
+	line.setRotation(angle);
+
+	line.setFillColor(Color(75, 75, 75));
+
+//	################################	head1	#####################################
+
+	head1.setFillColor(Color::Black);
+	head1.setRadius(10);
+	head1.setPointCount(3);
+	head1.setOrigin(head1.getRadius(), head1.getRadius());
+	head1.setPosition(point2.x, point2.y);
+	head1.setRotation(angle + 90);
+
+//	################################	head2	#####################################
+
+	head2.setFillColor(Color::Black);
+	head2.setRadius(10);
+	head2.setPointCount(3);
+	head2.setOrigin(head2.getRadius(), head2.getRadius());
+	head2.setPosition(point2.x, point2.y);
+	head2.setRotation(angle - 90);
+}
+
+void DoubleHeadedArrow::draw(RenderTarget& target, RenderStates states) const
+{
+	states.transform *= getTransform();
+
+	states.texture = nullptr;
+
+	target.draw(line, states);
+	target.draw(head1, states);
+	target.draw(head2, states);
+}
+
+double DoubleHeadedArrow::get_angle(const sf::Vector2f& point1,const sf::Vector2f& point2)
 {
 	double gradient = Point::calcGradientPrecise(Point(point1.x, point1.y), Point(point2.x, point2.y));
 	double angle = atan(gradient) * 180.0 / M_PI;
@@ -103,6 +174,11 @@ void Target::setTarget(const Vector2f& position, const sf::CircleShape& source)
 Vector2f Target::getPosition()
 {
 	return inner.getPosition();
+}
+
+FloatRect Target::getGlobalBounds()
+{
+	return outer.getGlobalBounds();
 }
 
 void Target::draw(RenderTarget& target, RenderStates states) const

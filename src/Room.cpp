@@ -171,9 +171,9 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 				break;
 			}
 		}
-		cout << "refl pt: " << reflPt
-				<< ", next: " << to_string(currDir)
-				<< ", incr: " << increment << '\n';
+//		cout << "refl pt: " << reflPt
+//				<< ", next: " << to_string(currDir)
+//				<< ", incr: " << increment << '\n';
 	}
 
 	if (sourceGradient == targetGradient)
@@ -192,11 +192,11 @@ void Room::calcReflectionPoints()
 		if (rp.isValid())
 		{
 			reflectionPoints.push_back(rp);
-			cout << "Reflection point: " << rp << endl;
+//			cout << "Reflection point: " << rp << endl;
 		}
 		else
 		{
-			cout << "Invalid reflection point" << endl;
+//			cout << "Invalid reflection point" << endl;
 		}
 	}
 }
@@ -208,13 +208,13 @@ void Room::calcDistances()
 	cout << fixed << setprecision(3) << setfill(' ');
 
 	distances.push_back(Point::calcDistance(source, target));
-	cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
+//	cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
 
 	for (auto reflPt : reflectionPoints)
 	{
 		distances.push_back(Point::calcDistance(source, reflPt) + Point::calcDistance(reflPt, target));
 
-		cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
+//		cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
 	}
 }
 

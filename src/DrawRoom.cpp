@@ -17,6 +17,7 @@ using namespace sf;
 
 DrawRoom::DrawRoom(Room& r):
 		room(r),
+		mode { UNSELECTED },
 		extension { 25 },
 		ratio { 1 }
 {
@@ -40,6 +41,8 @@ void DrawRoom::setSize(int x)
 	{
 		bounds.setSize(Vector2f(maxY * ratio, maxY));
 	}
+
+	calcTransformRatio();
 }
 
 Vector2u DrawRoom::getRoomSize()
@@ -55,23 +58,56 @@ Vector2u DrawRoom::getVisualizationSize()
 	return v2u;
 }
 
-void DrawRoom::calcTransformRatio()
+
+
+void DrawRoom::setMode(Mode mode)
 {
-	ratio = room.sizeX / bounds.getSize().x;
+	switch (mode)
+	{
+	case SHOW_REFLECTIONS:
+		if (this->mode != mode)
+		{
+			createReflectionPoints();
+			createWaveDir();
+
+			this->mode = mode;
+		}
+
+
+		break;
+
+	case SHOW_DISTANCES:
+		if (this->mode != mode)
+		{
+			eraseWaveDir();
+			eraseReflectionPoints();
+
+			this->mode = mode;
+		}
+
+		break;
+
+	default:
+		break;
+	}
+}
+
+void DrawRoom::resetMode(Mode mode)
+{
+	this->mode = UNSELECTED;
+	setMode(mode);
 }
 
 void DrawRoom::createPoints()
 {
-	reflectionPoints.clear();
+	Vector2f origin = bounds.getPosition();
 
-	auto origin = bounds.getPosition();
-	double rpSize = 10;
-	double stSize = 15;
+	double Size = 15;
 
 	// source
-	source.setFillColor(Color(104, 216, 107));
-	source.setRadius(stSize);
-	source.setOrigin(stSize, stSize);
+	source.setFillColor(Color(240, 75, 75));
+	source.setRadius(Size);
+	source.setOrigin(Size, Size);
 	source.setPosition(origin.x + millisToPixels(room.source.getX()),
 			origin.y + millisToPixels(room.source.getY()));
 
@@ -79,8 +115,35 @@ void DrawRoom::createPoints()
 	// target
 	target.setTarget(Vector2f(origin.x + millisToPixels(room.target.getX()),
 			origin.y + millisToPixels(room.target.getY())), source);
+}
 
-	// reflection points
+int DrawRoom::getExtension()
+{
+	return extension;
+}
+
+FloatRect DrawRoom::getSourceBounds()
+{
+	return this->source.getGlobalBounds();
+}
+
+FloatRect DrawRoom::getTargetBounds()
+{
+	return target.getGlobalBounds();
+}
+
+Vector2f DrawRoom::getSourcePos()
+{
+	return source.getPosition();
+}
+
+void DrawRoom::createReflectionPoints()
+{
+	reflectionPoints.clear();
+
+	double rpSize = 10;
+	Vector2f origin = bounds.getPosition();
+
 	for (ReflectionPoint rp : room.reflectionPoints)
 	{
 		reflectionPoints.push_back(VertexArray(TriangleFan, 17));
@@ -89,6 +152,7 @@ void DrawRoom::createPoints()
 		{
 			reflectionPoints.back()[i].color = Color::Cyan;
 		}
+
 		reflectionPoints.back()[0].position = Vector2f(origin.x + millisToPixels(rp.getX()),
 				origin.y + millisToPixels(rp.getY()));
 
@@ -113,6 +177,21 @@ void DrawRoom::createWaveDir()
 	waveDirections.emplace_back(source.getPosition(), target.getPosition());
 }
 
+void DrawRoom::calcTransformRatio()
+{
+	ratio = room.sizeX / bounds.getSize().x;
+}
+
+void DrawRoom::eraseReflectionPoints()
+{
+	reflectionPoints.clear();
+}
+
+void DrawRoom::eraseWaveDir()
+{
+	waveDirections.clear();
+}
+
 double DrawRoom::millisToPixels(int millis)
 {
 	return millis / ratio;
@@ -131,7 +210,7 @@ void DrawRoom::draw(RenderTarget& target, RenderStates states) const
 		target.draw(i);
 	}
 
-	for (auto i : reflectionPoints)
+	for (VertexArray i : reflectionPoints)
 	{
 		target.draw(i);
 	}
@@ -158,10 +237,7 @@ int DrawRoom::startAngle(Wall wall)
 }
 
 
-int DrawRoom::getExtension()
-{
-	return extension;
-}
+
 
 
 

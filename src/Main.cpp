@@ -26,15 +26,24 @@ int main()
 
 	DrawRoom dRoom(room);
 	dRoom.setSize(640);
-	dRoom.calcTransformRatio();
 	dRoom.createPoints();
-	dRoom.createWaveDir();
+	dRoom.setMode(SHOW_REFLECTIONS);
+
+	Cursor arrowCursor;
+	arrowCursor.loadFromSystem(Cursor::Arrow);
+
+	Cursor handCursor;
+	handCursor.loadFromSystem(Cursor::Hand);
+
 
 	RenderWindow window(VideoMode(dRoom.getVisualizationSize().x, dRoom.getVisualizationSize().y), "Hanginterferencia modellezese");
-	window.setFramerateLimit(30);
+	window.setFramerateLimit(10);
 
 	while (window.isOpen())
 	{
+		window.clear(Color(245, 245, 245));
+		window.draw(dRoom);
+
 		Event event;
 		while (window.pollEvent(event))
 		{
@@ -46,27 +55,56 @@ int main()
 		    if (event.type == sf::Event::Resized)
 		    {
 		    	dRoom.setSize(event.size.width - dRoom.getExtension() * 2);
-		    	dRoom.calcTransformRatio();
+
 		    	dRoom.createPoints();
-		    	dRoom.createWaveDir();
-
-//		    	cout << "Room: x: " << dRoom.getVisualizationSize().x << ", y: " <<  dRoom.getVisualizationSize().y << endl;
-//		    	cout << "Window: x: " << event.size.width << ", y: " <<  event.size.height << endl;
-//		    	cout << endl;
-
-
-		    	// viewport only works with actual window size
-//		        sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-//		        window.setView(sf::View(visibleArea));
+		    	dRoom.resetMode(SHOW_REFLECTIONS);
 
 		    	window.setSize(dRoom.getVisualizationSize());
 		        sf::FloatRect visibleArea(0, 0, dRoom.getVisualizationSize().x, dRoom.getVisualizationSize().y);
 		        window.setView(sf::View(visibleArea));
 		    }
+
+		    if (event.type == sf::Event::MouseMoved)
+		    {
+		    	Vector2f mousePos = static_cast<Vector2f>(Mouse::getPosition(window));
+		    	FloatRect sourceBox = dRoom.getSourceBounds();
+		    	FloatRect targetBox = dRoom.getTargetBounds();
+
+		    	if (sourceBox.contains(mousePos))
+		    	{
+		    		window.setMouseCursor(handCursor);
+		    	}
+		    	else if (targetBox.contains(mousePos))
+				{
+		    		window.setMouseCursor(handCursor);
+				}
+		    	else
+		    	{
+		    		window.setMouseCursor(arrowCursor);
+		    	}
+		    }
+
+		    if (event.type == sf::Event::MouseButtonPressed)
+		    {
+		    	Vector2f mousePos = static_cast<Vector2f>(Mouse::getPosition(window));
+		    	FloatRect sourceBox = dRoom.getSourceBounds();
+		    	FloatRect targetBox = dRoom.getTargetBounds();
+
+		    	if (sourceBox.contains(mousePos))
+		    	{
+		    		dRoom.setMode(SHOW_DISTANCES);
+		    	}
+		    	else if (targetBox.contains(mousePos))
+				{
+		    		dRoom.setMode(SHOW_DISTANCES);
+				}
+		    }
+		    else if (event.type == sf::Event::MouseButtonReleased)
+		    {
+		    	dRoom.setMode(SHOW_REFLECTIONS);
+		    }
 		}
 
-		window.clear(Color(245, 245, 245));
-		window.draw(dRoom);
 		window.display();
 	}
     return 0;
