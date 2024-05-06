@@ -31,22 +31,15 @@ Arrow::Arrow(const Vector2f& point1,const Vector2f& point2)
 	double angle = get_angle(point1, point2);
 	line.setRotation(angle);
 
-	line.setFillColor(Color(75, 75, 75));
+	line.setFillColor(Colors::DARKGREY);
 
 //	########################	HEAD	##############################################
-	head.setFillColor(Color::Black);
+	head.setFillColor(Colors::BLACK);
 	head.setRadius(10);
 	head.setPointCount(3);
 	head.setOrigin(head.getLocalBounds().width / 2, head.getLocalBounds().height / 2);
 	head.setPosition((point1.x + point2.x) / 2, (point1.y + point2.y) / 2);
 	head.setRotation(angle + 90);
-}
-
-void Arrow::enable()
-{
-	line.setFillColor(Color::Transparent);
-
-	head.setFillColor(Color::Transparent);
 }
 
 void Arrow::draw(RenderTarget& target, RenderStates states) const
@@ -79,37 +72,42 @@ DoubleHeadedArrow::DoubleHeadedArrow()
 
 DoubleHeadedArrow::DoubleHeadedArrow(const sf::Vector2f& point1,const sf::Vector2f& point2)
 {
-//	################################	line	#####################################
+	setArrow(point1, point2);
+}
 
-	double size = sqrt(pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2));
-	line.setSize(Vector2f(size, 3));
+void DoubleHeadedArrow::setArrow(const Vector2f& point1, const Vector2f& point2)
+{
+	//	################################	line	#####################################
 
-	line.setOrigin(0, line.getLocalBounds().height / 2);
+		double size = sqrt(pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2)) - 10;
+		line.setSize(Vector2f(size, 3));
 
-	line.setPosition(point1);
+		line.setOrigin(0, line.getLocalBounds().height / 2);
 
-	double angle = get_angle(point1, point2);
-	line.setRotation(angle);
+		line.setPosition(point1);
 
-	line.setFillColor(Color(75, 75, 75));
+		double angle = get_angle(point1, point2);
+		line.setRotation(angle);
 
-//	################################	head1	#####################################
+		line.setFillColor(Colors::RED);
 
-	head1.setFillColor(Color::Black);
-	head1.setRadius(10);
-	head1.setPointCount(3);
-	head1.setOrigin(head1.getRadius(), head1.getRadius());
-	head1.setPosition(point2.x, point2.y);
-	head1.setRotation(angle + 90);
+	//	################################	head1	#####################################
 
-//	################################	head2	#####################################
+		head1.setFillColor(Color::Black);
+		head1.setRadius(10);
+		head1.setPointCount(3);
+		head1.setOrigin(head1.getRadius(), 0);
+		head1.setPosition(point1.x, point1.y);
+		head1.setRotation(angle - 90);
 
-	head2.setFillColor(Color::Black);
-	head2.setRadius(10);
-	head2.setPointCount(3);
-	head2.setOrigin(head2.getRadius(), head2.getRadius());
-	head2.setPosition(point2.x, point2.y);
-	head2.setRotation(angle - 90);
+	//	################################	head2	#####################################
+
+		head2.setFillColor(Colors::BLACK);
+		head2.setRadius(10);
+		head2.setPointCount(3);
+		head2.setOrigin(head2.getRadius(), 0);
+		head2.setPosition(point2.x, point2.y);
+		head2.setRotation(angle + 90);
 }
 
 void DoubleHeadedArrow::draw(RenderTarget& target, RenderStates states) const
@@ -149,7 +147,7 @@ Target::Target(const Vector2f& position, const sf::CircleShape& source)
 	inner.setPosition(position);
 
 	outer.setRadius(source.getRadius());
-	outer.setFillColor(Color::White);
+	outer.setFillColor(Colors::WHITE);
 	outer.setOrigin(outer.getRadius(), outer.getRadius());
 	outer.setPosition(position);
 	outer.setOutlineColor(source.getFillColor());
@@ -164,7 +162,7 @@ void Target::setTarget(const Vector2f& position, const sf::CircleShape& source)
 	inner.setPosition(position);
 
 	outer.setRadius(source.getRadius());
-	outer.setFillColor(Color::White);
+	outer.setFillColor(Colors::WHITE);
 	outer.setOrigin(outer.getRadius(), outer.getRadius());
 	outer.setPosition(position);
 	outer.setOutlineColor(source.getFillColor());
@@ -179,6 +177,12 @@ Vector2f Target::getPosition()
 FloatRect Target::getGlobalBounds()
 {
 	return outer.getGlobalBounds();
+}
+
+void Target::move(const sf::Vector2f& offset)
+{
+	inner.move(offset);
+	outer.move(offset);
 }
 
 void Target::draw(RenderTarget& target, RenderStates states) const

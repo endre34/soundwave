@@ -19,8 +19,6 @@ int main()
 	Room room(5.6, 6.0);
 	room.setSource(Point(2.7, 3.0));
 	room.setTarget(Point(0.4, 5.0));
-	room.calcReflectionPoints();
-	room.calcDistances();
 	//room.setParams(57);
 	//room.calcKiteresek();
 
@@ -37,7 +35,7 @@ int main()
 
 
 	RenderWindow window(VideoMode(dRoom.getVisualizationSize().x, dRoom.getVisualizationSize().y), "Hanginterferencia modellezese");
-	window.setFramerateLimit(10);
+	window.setFramerateLimit(60);
 
 	while (window.isOpen())
 	{
@@ -56,8 +54,8 @@ int main()
 		    {
 		    	dRoom.setSize(event.size.width - dRoom.getExtension() * 2);
 
-		    	dRoom.createPoints();
-		    	dRoom.resetMode(SHOW_REFLECTIONS);
+		    	//dRoom.createPoints();
+		    	dRoom.resetMode();
 
 		    	window.setSize(dRoom.getVisualizationSize());
 		        sf::FloatRect visibleArea(0, 0, dRoom.getVisualizationSize().x, dRoom.getVisualizationSize().y);
@@ -66,44 +64,58 @@ int main()
 
 		    if (event.type == sf::Event::MouseMoved)
 		    {
-		    	Vector2f mousePos = static_cast<Vector2f>(Mouse::getPosition(window));
-		    	FloatRect sourceBox = dRoom.getSourceBounds();
-		    	FloatRect targetBox = dRoom.getTargetBounds();
+		    	Vector2f mousePos(event.mouseMove.x, event.mouseMove.y);
 
-		    	if (sourceBox.contains(mousePos))
-		    	{
-		    		window.setMouseCursor(handCursor);
-		    	}
-		    	else if (targetBox.contains(mousePos))
-				{
-		    		window.setMouseCursor(handCursor);
-				}
-		    	else
-		    	{
-		    		window.setMouseCursor(arrowCursor);
-		    	}
+	    		if (Mouse::isButtonPressed(Mouse::Left) && dRoom.getMovedPoint() != NOTHING)
+	    		{
+	    			dRoom.setMoveEnd(mousePos);
+	    			dRoom.movePoint();
+	    			dRoom.createDistances();
+	    		}
+	    		else
+	    		{
+			    	FloatRect sourceBox = dRoom.getSourceBounds();
+			    	FloatRect targetBox = dRoom.getTargetBounds();
+
+			    	if (sourceBox.contains(mousePos) || targetBox.contains(mousePos))
+			    		window.setMouseCursor(handCursor);
+			    	else
+			    		window.setMouseCursor(arrowCursor);
+	    		}
 		    }
 
 		    if (event.type == sf::Event::MouseButtonPressed)
 		    {
-		    	Vector2f mousePos = static_cast<Vector2f>(Mouse::getPosition(window));
+		    	Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
 		    	FloatRect sourceBox = dRoom.getSourceBounds();
 		    	FloatRect targetBox = dRoom.getTargetBounds();
 
 		    	if (sourceBox.contains(mousePos))
 		    	{
+		    		dRoom.setMoveBegin(mousePos);
+
+		    		dRoom.setMovedPoint(SOURCE);
+
 		    		dRoom.setMode(SHOW_DISTANCES);
 		    	}
 		    	else if (targetBox.contains(mousePos))
-				{
+		    	{
+		    		dRoom.setMoveBegin(mousePos);
+
+		    		dRoom.setMovedPoint(TARGET);
+
 		    		dRoom.setMode(SHOW_DISTANCES);
-				}
+		    	}
 		    }
 		    else if (event.type == sf::Event::MouseButtonReleased)
 		    {
 		    	dRoom.setMode(SHOW_REFLECTIONS);
+
+		    	dRoom.setMovedPoint(NOTHING);
 		    }
 		}
+
+		Color blue(75, 75, 75);
 
 		window.display();
 	}

@@ -8,6 +8,14 @@
 #include "utils.hpp"
 
 
+const sf::Color Colors::BLUE(0, 0, 255);
+const sf::Color Colors::WHITE(255, 255, 255);
+const sf::Color Colors::CYAN(50, 250, 250);
+const sf::Color Colors::BLACK(0, 0, 0);
+const sf::Color Colors::RED(240, 75, 75);
+const sf::Color Colors::DARKGREY(75, 75, 75);
+
+
 double round_to_precision(double value, int decimal_places)
 {
     double multiplier = std::pow(10.0, decimal_places);

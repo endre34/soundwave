@@ -19,15 +19,20 @@ DrawRoom::DrawRoom(Room& r):
 		room(r),
 		mode { UNSELECTED },
 		extension { 25 },
-		ratio { 1 }
+		ratio { 1 },
+		movedObject { NOTHING },
+		begin(0, 0),
+		end(begin)
 {
 	bounds.setPosition(Vector2f(extension, extension));
 	bounds.getPosition();
-	bounds.setFillColor(Color::White);
-	bounds.setOutlineColor(Color::Blue);
+	bounds.setFillColor(Colors::WHITE);
+	bounds.setOutlineColor(Colors::BLUE);
 	bounds.setOutlineThickness(3);
 
-
+	font.loadFromFile("Media/Somer.ttf");
+	textX.setFont(font);
+	textY.setFont(font);
 }
 
 void DrawRoom::setSize(int x)
@@ -59,7 +64,6 @@ Vector2u DrawRoom::getVisualizationSize()
 }
 
 
-
 void DrawRoom::setMode(Mode mode)
 {
 	switch (mode)
@@ -67,24 +71,23 @@ void DrawRoom::setMode(Mode mode)
 	case SHOW_REFLECTIONS:
 		if (this->mode != mode)
 		{
+			room.calcReflectionPoints();
+			room.calcDistances();
+
 			createReflectionPoints();
 			createWaveDir();
 
 			this->mode = mode;
 		}
-
-
 		break;
 
 	case SHOW_DISTANCES:
 		if (this->mode != mode)
 		{
-			eraseWaveDir();
-			eraseReflectionPoints();
+			createDistances();
 
 			this->mode = mode;
 		}
-
 		break;
 
 	default:
@@ -92,9 +95,11 @@ void DrawRoom::setMode(Mode mode)
 	}
 }
 
-void DrawRoom::resetMode(Mode mode)
+void DrawRoom::resetMode()
 {
+	Mode mode = this->mode;
 	this->mode = UNSELECTED;
+
 	setMode(mode);
 }
 
@@ -105,7 +110,7 @@ void DrawRoom::createPoints()
 	double Size = 15;
 
 	// source
-	source.setFillColor(Color(240, 75, 75));
+	source.setFillColor(Colors::RED);
 	source.setRadius(Size);
 	source.setOrigin(Size, Size);
 	source.setPosition(origin.x + millisToPixels(room.source.getX()),
@@ -115,6 +120,52 @@ void DrawRoom::createPoints()
 	// target
 	target.setTarget(Vector2f(origin.x + millisToPixels(room.target.getX()),
 			origin.y + millisToPixels(room.target.getY())), source);
+}
+
+void DrawRoom::setMoveBegin(const Vector2f& pos)
+{
+	begin = pos;
+}
+
+void DrawRoom::setMoveEnd(const Vector2f& pos)
+{
+	end = pos;
+}
+
+void DrawRoom::setMovedPoint(Object object)
+{
+	movedObject = object;
+}
+
+Object DrawRoom::getMovedPoint()
+{
+	return movedObject;
+}
+
+void DrawRoom::movePoint()
+{
+	Vector2f delta(end.x - begin.x, end.y - begin.y);
+
+	switch (movedObject)
+	{
+	case SOURCE:
+		source.move(delta);
+
+		room.setSource(Point(pixelsToMillis(source.getPosition().x), pixelsToMillis(source.getPosition().y)));
+
+		break;
+
+	case TARGET:
+		target.move(delta);
+
+		room.setTarget(Point(pixelsToMillis(target.getPosition().x), pixelsToMillis(target.getPosition().y)));
+
+		break;
+
+	default:
+		break;
+	}
+	begin = end;
 }
 
 int DrawRoom::getExtension()
@@ -137,6 +188,30 @@ Vector2f DrawRoom::getSourcePos()
 	return source.getPosition();
 }
 
+void DrawRoom::createDistances()
+{
+	if (movedObject == SOURCE)
+	{
+		Vector2f pointX(bounds.getPosition().x, source.getPosition().y);
+		Vector2f pointS(source.getPosition().x - 8, source.getPosition().y);
+		distX.setArrow(pointS, pointX);
+
+		Vector2f pointY(source.getPosition().x, bounds.getPosition().y);
+		pointS = Vector2f(source.getPosition().x, source.getPosition().y - 8);
+		distY.setArrow(pointS, pointY);
+	}
+	else if (movedObject == TARGET)
+	{
+		Vector2f pointX(bounds.getPosition().x, target.getPosition().y);
+		Vector2f pointT(target.getPosition().x - 8, target.getPosition().y);
+		distX.setArrow(pointT, pointX);
+
+		Vector2f pointY(target.getPosition().x, bounds.getPosition().y);
+		pointT = Vector2f(target.getPosition().x, target.getPosition().y - 8);
+		distY.setArrow(pointT, pointY);
+	}
+}
+
 void DrawRoom::createReflectionPoints()
 {
 	reflectionPoints.clear();
@@ -150,7 +225,7 @@ void DrawRoom::createReflectionPoints()
 
 		for (int i = 0; i < (int)reflectionPoints.back().getVertexCount(); ++i)
 		{
-			reflectionPoints.back()[i].color = Color::Cyan;
+			reflectionPoints.back()[i].color = Colors::CYAN;
 		}
 
 		reflectionPoints.back()[0].position = Vector2f(origin.x + millisToPixels(rp.getX()),
@@ -182,19 +257,14 @@ void DrawRoom::calcTransformRatio()
 	ratio = room.sizeX / bounds.getSize().x;
 }
 
-void DrawRoom::eraseReflectionPoints()
-{
-	reflectionPoints.clear();
-}
-
-void DrawRoom::eraseWaveDir()
-{
-	waveDirections.clear();
-}
-
 double DrawRoom::millisToPixels(int millis)
 {
 	return millis / ratio;
+}
+
+int DrawRoom::pixelsToMillis(double pixels)
+{
+	return (int)(pixels * ratio);
 }
 
 void DrawRoom::draw(RenderTarget& target, RenderStates states) const
@@ -205,14 +275,31 @@ void DrawRoom::draw(RenderTarget& target, RenderStates states) const
 
 	target.draw(bounds);
 
-	for (auto i : waveDirections)
+	switch (mode)
 	{
-		target.draw(i);
-	}
+	case SHOW_REFLECTIONS:
 
-	for (VertexArray i : reflectionPoints)
-	{
-		target.draw(i);
+		for (auto i : waveDirections)
+		{
+			target.draw(i);
+		}
+
+		for (VertexArray i : reflectionPoints)
+		{
+			target.draw(i);
+		}
+
+		break;
+
+	case SHOW_DISTANCES:
+
+		target.draw(distX, states);
+		target.draw(distY, states);
+
+		break;
+
+	default:
+		break;
 	}
 
 	target.draw(this->source, states);

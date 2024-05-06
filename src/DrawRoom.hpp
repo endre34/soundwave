@@ -19,6 +19,13 @@ enum Mode
 	UNSELECTED
 };
 
+enum Object
+{
+	SOURCE,
+	TARGET,
+	NOTHING
+};
+
 
 class DrawRoom : public sf::Drawable, public sf::Transformable
 {
@@ -30,9 +37,17 @@ public:
 	sf::Vector2u getVisualizationSize();
 
 	void setMode(Mode mode);
-	void resetMode(Mode mode);
+	void resetMode();
 
 	void createPoints();
+
+	void setMoveBegin(const sf::Vector2f& pos);
+	void setMoveEnd(const sf::Vector2f& pos);
+	void setMovedPoint(Object object);
+	Object getMovedPoint();
+
+	void movePoint();
+
 
 	int getExtension();
 
@@ -40,6 +55,8 @@ public:
 	sf::FloatRect getTargetBounds();
 
 	sf::Vector2f getSourcePos();
+
+	void createDistances();
 
 private:
 	Room& room;
@@ -54,23 +71,27 @@ private:
 	sf::CircleShape source;
 	Target target;
 
-//	Mode: VISUALISING_REFLECTIONS
+//	Mode: SHOW_REFLECTIONS
 	std::vector<sf::VertexArray> reflectionPoints;
 	std::vector<Arrow> waveDirections;
 
-//	Mode: SETTING_DISTANCES
-	DoubleHeadedArrow distX;
-	DoubleHeadedArrow distY;
+//	Mode: SHOW_DISTANCES
+	DoubleHeadedArrow distX, distY;
+
+	sf::Font font;
+	sf::Text textX, textY;
+
+	Object movedObject;
+	sf::Vector2f begin, end;
 
 	void createReflectionPoints();
 	void createWaveDir();
 	void calcTransformRatio();
 
-	void eraseReflectionPoints();
-	void eraseWaveDir();
-
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
 	double millisToPixels(int millis);
+	int pixelsToMillis(double pixels);
 	int startAngle(Wall wall);
 
 };

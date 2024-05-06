@@ -6,6 +6,19 @@
 #ifndef UTILS_HPP_
 #define UTILS_HPP_
 
+#include <SFML/Graphics.hpp>
+
+
+struct Colors
+{
+	const static sf::Color BLUE;
+	const static sf::Color WHITE;
+	const static sf::Color CYAN;
+	const static sf::Color BLACK;
+	const static sf::Color RED;
+	const static sf::Color DARKGREY;
+};
+
 double round_to_precision(double value, int decimal_places);
 
 int to_millis(double meters);

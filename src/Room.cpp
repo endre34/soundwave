@@ -143,7 +143,7 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 	ReflectionPoint reflPt = calcInitalReflectionPoint(wall);
 
 	double sourceGradient = Point::calcGradient(source, reflPt);
-	double targetGradient = Point::calcGradient(reflPt, target);
+	double targetGradient = Point::calcGradient(target, reflPt);
 
 	Direction prevDir = calcDirection(wall, sourceGradient, targetGradient);
 
@@ -157,7 +157,7 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 		reflPt = calcNextReflectionPoint(prevDir, increment, reflPt);
 
 		sourceGradient = Point::calcGradient(source, reflPt);
-		targetGradient = Point::calcGradient(reflPt, target);
+		targetGradient = Point::calcGradient(target, reflPt);
 
 		Direction currDir = calcDirection(wall, sourceGradient, targetGradient);
 
@@ -167,7 +167,7 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 			increment = increment / 2;
 			if (increment == 0)
 			{
-				cout << "Increment is 0, exiting" << endl;
+//				cout << "Increment is 0, exiting" << endl;
 				break;
 			}
 		}
@@ -175,6 +175,8 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 //				<< ", next: " << to_string(currDir)
 //				<< ", incr: " << increment << '\n';
 	}
+
+	cout << sourceGradient << " " << targetGradient << endl;
 
 	if (sourceGradient == targetGradient)
 		return ReflectionPoint(-1, -1, wall);					// Collision with target in reflection path
@@ -199,6 +201,7 @@ void Room::calcReflectionPoints()
 //			cout << "Invalid reflection point" << endl;
 		}
 	}
+	cout << endl;
 }
 
 void Room::calcDistances()

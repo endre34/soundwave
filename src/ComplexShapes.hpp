@@ -14,9 +14,6 @@ class Arrow : public sf::Drawable, public sf::Transformable
 public:
 	Arrow(const sf::Vector2f& point1,const sf::Vector2f& point2);
 
-	void enable();
-	void disable();
-
 private:
 	sf::RectangleShape line;
 	sf::CircleShape head;
@@ -25,11 +22,15 @@ private:
 	double get_angle(const sf::Vector2f& point1,const sf::Vector2f& point2);
 };
 
+// ##############################################################################
+
 class DoubleHeadedArrow : public sf::Drawable, public sf::Transformable
 {
 public:
 	DoubleHeadedArrow();
 	DoubleHeadedArrow(const sf::Vector2f& point1,const sf::Vector2f& point2);
+
+	void setArrow(const sf::Vector2f& point1,const sf::Vector2f& point2);
 
 private:
 	sf::RectangleShape line;
@@ -40,6 +41,7 @@ private:
 	double get_angle(const sf::Vector2f& point1,const sf::Vector2f& point2);
 };
 
+// ##############################################################################
 
 class Target : public sf::Drawable, public sf::Transformable
 {
@@ -52,6 +54,8 @@ public:
 	sf::Vector2f getPosition();
 
 	sf::FloatRect getGlobalBounds();
+
+	void move(const sf::Vector2f& offset);
 
 private:
 	sf::CircleShape inner, outer;
