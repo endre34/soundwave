@@ -116,6 +116,11 @@ Point Room::getSource()
 	return source;
 }
 
+Point Room::getTarget()
+{
+	return target;
+}
+
 void Room::setTarget(const Point& target)
 {
 	this->target = target;

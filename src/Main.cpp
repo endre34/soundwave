@@ -16,9 +16,9 @@ using namespace sf;
 
 int main()
 {
-	Room room(5.6, 6.0);
+	Room room(6.5, 5.0);
 	room.setSource(Point(2.7, 3.0));
-	room.setTarget(Point(0.4, 5.0));
+	room.setTarget(Point(4.1, 2.3));
 	//room.setParams(57);
 	//room.calcKiteresek();
 
@@ -54,7 +54,7 @@ int main()
 		    {
 		    	dRoom.setSize(event.size.width - dRoom.getExtension() * 2);
 
-		    	//dRoom.createPoints();
+		    	dRoom.createPoints();
 		    	dRoom.resetMode();
 
 		    	window.setSize(dRoom.getVisualizationSize());

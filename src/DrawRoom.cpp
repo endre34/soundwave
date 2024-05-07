@@ -30,7 +30,7 @@ DrawRoom::DrawRoom(Room& r):
 	bounds.setOutlineColor(Colors::BLUE);
 	bounds.setOutlineThickness(3);
 
-	font.loadFromFile("Media/Somer.ttf");
+	font.loadFromFile("Media/noto_sans.ttf");
 	textX.setFont(font);
 	textY.setFont(font);
 }
@@ -151,14 +151,16 @@ void DrawRoom::movePoint()
 	case SOURCE:
 		source.move(delta);
 
-		room.setSource(Point(pixelsToMillis(source.getPosition().x), pixelsToMillis(source.getPosition().y)));
+		room.setSource(Point(pixelsToMillis(source.getPosition().x - bounds.getPosition().x),
+							pixelsToMillis(source.getPosition().y - bounds.getPosition().y)));
 
 		break;
 
 	case TARGET:
 		target.move(delta);
 
-		room.setTarget(Point(pixelsToMillis(target.getPosition().x), pixelsToMillis(target.getPosition().y)));
+		room.setTarget(Point(pixelsToMillis(target.getPosition().x - bounds.getPosition().x),
+							pixelsToMillis(target.getPosition().y - bounds.getPosition().y)));
 
 		break;
 
@@ -196,9 +198,33 @@ void DrawRoom::createDistances()
 		Vector2f pointS(source.getPosition().x - 8, source.getPosition().y);
 		distX.setArrow(pointS, pointX);
 
+		textX.setCharacterSize(15);
+		textX.setFillColor(Colors::BLACK);
+
+		string meters = to_string(room.getSource().getXMeters());
+		meters.erase(meters.find_last_not_of('0') + 1, string::npos);
+		meters += " m";
+		textX.setString(meters);
+
+		textX.setOrigin(textX.getGlobalBounds().width / 2, textX.getGlobalBounds().height);
+		textX.setPosition((pointX.x + pointS.x) / 2, (pointX.y + pointS.y) / 2 - 10);
+
+
 		Vector2f pointY(source.getPosition().x, bounds.getPosition().y);
 		pointS = Vector2f(source.getPosition().x, source.getPosition().y - 8);
 		distY.setArrow(pointS, pointY);
+
+		textY.setCharacterSize(15);
+		textY.setFillColor(Colors::BLACK);
+
+
+		meters = to_string(room.getSource().getYMeters());
+		meters.erase(meters.find_last_not_of('0') + 1, string::npos);
+		meters += " m";
+		textY.setString(meters);
+
+		textY.setOrigin(0, textY.getGlobalBounds().height / 2);
+		textY.setPosition((pointY.x + pointS.x) / 2 + 10, (pointY.y + pointS.y) / 2);
 	}
 	else if (movedObject == TARGET)
 	{
@@ -206,9 +232,31 @@ void DrawRoom::createDistances()
 		Vector2f pointT(target.getPosition().x - 8, target.getPosition().y);
 		distX.setArrow(pointT, pointX);
 
+		textX.setCharacterSize(15);
+		textX.setFillColor(Colors::BLACK);
+
+		string meters = to_string(room.getTarget().getXMeters());
+		meters.erase(meters.find_last_not_of('0') + 1, string::npos);
+		meters += " m";
+		textX.setString(meters);
+
+		textX.setOrigin(textX.getGlobalBounds().width / 2, textX.getGlobalBounds().height);
+		textX.setPosition((pointX.x + pointT.x) / 2, (pointX.y + pointT.y) / 2 - 10);
+
 		Vector2f pointY(target.getPosition().x, bounds.getPosition().y);
 		pointT = Vector2f(target.getPosition().x, target.getPosition().y - 8);
 		distY.setArrow(pointT, pointY);
+
+		textY.setCharacterSize(15);
+		textY.setFillColor(Colors::BLACK);
+
+		meters = to_string(room.getTarget().getYMeters());
+		meters.erase(meters.find_last_not_of('0') + 1, string::npos);
+		meters += " m";
+		textY.setString(meters);
+
+		textY.setOrigin(0, textY.getGlobalBounds().height / 2);
+		textY.setPosition((pointY.x + pointT.x) / 2 + 10, (pointY.y + pointT.y) / 2);
 	}
 }
 
@@ -294,7 +342,10 @@ void DrawRoom::draw(RenderTarget& target, RenderStates states) const
 	case SHOW_DISTANCES:
 
 		target.draw(distX, states);
+		target.draw(textX, states);
+
 		target.draw(distY, states);
+		target.draw(textY, states);
 
 		break;
 

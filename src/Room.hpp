@@ -24,6 +24,7 @@ public:
 	void setSize(double sizeX, double sizeY);
 
 	Point getSource();
+	Point getTarget();
 
 	void calcReflectionPoints();
 	void calcDistances();
