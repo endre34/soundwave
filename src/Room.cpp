@@ -219,7 +219,7 @@ void Room::calcDistances()
 	cout << fixed << setprecision(3) << setfill(' ');
 
 	distances.push_back(Point::calcDistance(source, target));
-//	cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
+	cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
 
 	for (ReflectionPoint reflPt : reflectionPoints)
 	{
@@ -231,6 +231,7 @@ void Room::calcDistances()
 
 void Room::calcDisplacement()
 {
+	displacements.clear();
 	cout << fixed << setprecision(10);
 
 	double intensity = pow(10, -12 + soundPressureLevel / 10) / pow(to_meters(distances.front()), 2);
@@ -280,7 +281,7 @@ void Room::splAtTarget()
 
 	double mainDispl = sqrt(pow(displX, 2) + pow(displY, 2));
 
-	cout << "amplitude: " << mainDispl;
+	cout << "main_displacement: " << mainDispl;
 
 	double intensity = 2 * pow(M_PI, 2) * airDensity * pow(mainDispl, 2) * pow(frequency, 2) * propagationSpeed;
 

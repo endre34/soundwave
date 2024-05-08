@@ -21,7 +21,7 @@ int main()
 
 
 	room.setSource(Point(1.0, 3.0));
-	room.setTarget(Point(2.0, 4.0));
+	room.setTarget(Point(3.0, 4.0));
 	room.calcReflectionPoints();
 	room.setParams(57);
 	room.calcDistances();
