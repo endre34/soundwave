@@ -16,11 +16,16 @@ using namespace sf;
 
 int main()
 {
-	Room room(6.5, 5.0);
-	room.setSource(Point(2.7, 3.0));
-	room.setTarget(Point(4.1, 2.3));
-	//room.setParams(57);
-	//room.calcKiteresek();
+	Room room(5.0, 5.0);			// szoba merete Meterben
+
+
+
+	room.setSource(Point(1.0, 3.0));
+	room.setTarget(Point(2.0, 4.0));
+	room.calcReflectionPoints();
+	room.setParams(57);
+	room.calcDistances();
+	room.calcDisplacement();
 
 	DrawRoom dRoom(room);
 	dRoom.setSize(640);
@@ -37,6 +42,7 @@ int main()
 	RenderWindow window(VideoMode(dRoom.getVisualizationSize().x, dRoom.getVisualizationSize().y), "Hanginterferencia modellezese");
 	window.setFramerateLimit(60);
 
+	if (window.hasFocus())
 	while (window.isOpen())
 	{
 		window.clear(Color(245, 245, 245));
@@ -119,5 +125,7 @@ int main()
 
 		window.display();
 	}
+
+
     return 0;
 }

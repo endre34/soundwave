@@ -71,8 +71,11 @@ void DrawRoom::setMode(Mode mode)
 	case SHOW_REFLECTIONS:
 		if (this->mode != mode)
 		{
+			cout << endl;
 			room.calcReflectionPoints();
 			room.calcDistances();
+			room.calcDisplacement();
+			room.splAtTarget();
 
 			createReflectionPoints();
 			createWaveDir();

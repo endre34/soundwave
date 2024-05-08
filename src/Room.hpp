@@ -28,11 +28,16 @@ public:
 
 	void calcReflectionPoints();
 	void calcDistances();
-	void calcKiteresek();
+	void calcDisplacement();
+	void splAtTarget();
 
 	ReflectionPoint calcReflectionPoint(Wall wall);
 
 	friend class DrawRoom;
+
+	constexpr static double propagationSpeed{ 343.5 };	// m/s
+	constexpr static double airDensity{ 1.2045 };		// kg/m^3
+	constexpr static int soundPressureLevel{ 70 };		// dB @ 1m from source
 
 private:
 	int sizeX, sizeY;
@@ -40,24 +45,25 @@ private:
 	std::vector<ReflectionPoint> reflectionPoints;
 
 	std::vector<int> distances;
-	std::vector<double> kiteresek;
+	std::vector<double> displacements;
 
-	// terjedesi sebesseg: 343.5
-	// levego surusege: 1.2045
-	const int SPL = 70;		// @ 1m from source
-	int waveleght, frequency;
-	double period, maxAmplitude, kiteres;
+	int frequency;
+	double waveleght, period, kiteres;
+
+	double targetSPL { soundPressureLevel };
 
 	enum Direction
 	{
 		TOWARD_SOURCE,
 		TOWARD_TARGET
 	};
+
 	std::string to_string(Direction dir);
 
 	Direction calcDirection(Wall wall, double sourceGradient, double targetGradient);
 	ReflectionPoint calcInitalReflectionPoint(Wall wall);
 	ReflectionPoint calcNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP);
+	double getAngle(const Point& point1, const Point& point2);
 };
 
 

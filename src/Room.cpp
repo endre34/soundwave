@@ -12,36 +12,33 @@
 using namespace std;
 
 
-Room::Room(double sizeX, double sizeY) :
-		waveleght { 0 },
+Room::Room(double sizeX, double sizeY) : // @suppress("Class members should be properly initialized")
 		frequency { 0 },
+		waveleght { 0 },
 		period { 0 },
-		maxAmplitude { 0 },
 		kiteres { 0 }
 {
 	this->sizeX = to_millis(sizeX);
 	this->sizeY = to_millis(sizeY);
 }
 
-Room::Room(const Room& room) :
+Room::Room(const Room& room) : // @suppress("Class members should be properly initialized")
 		sizeX { room.sizeX },
 		sizeY { room.sizeY },
-		waveleght { room.waveleght },
 		frequency { room.frequency },
+		waveleght { room.waveleght },
 		period { room.period },
-		maxAmplitude { room.maxAmplitude },
 		kiteres { room.kiteres }
 {
 	// empty
 }
 
-Room::Room() :
+Room::Room() : // @suppress("Class members should be properly initialized")
 		sizeX { 0 },
 		sizeY { 0 },
-		waveleght { 0 },
 		frequency { 0 },
+		waveleght { 0 },
 		period { 0 },
-		maxAmplitude { 0 },
 		kiteres { 0 }
 {
 	// empty
@@ -106,6 +103,19 @@ ReflectionPoint Room::calcNextReflectionPoint(Direction direction, int increment
 	}
 }
 
+double Room::getAngle(const Point& point1, const Point& point2)
+{
+	double gradient = Point::calcGradientPrecise(point1, point2);
+	double angle = atan(gradient) * 180.0 / M_PI;
+
+	if (point2.getX() - point1.getX() < 0)
+	{
+		angle += 180.0;
+	}
+
+	return angle;
+}
+
 void Room::setSource(const Point& source)
 {
 	this->source = source;
@@ -130,11 +140,8 @@ void Room::setParams(int freq)
 {
 	frequency = freq;
 	period = 1.0 / (double)freq;
-	waveleght = round(343500.0 * period);
-	maxAmplitude = sqrt(pow(10, -12 + SPL / 10 + 6) / (2 * pow(M_PI, 2) * 1.2045 * 343.5 * pow(freq, 2)));
+	waveleght = propagationSpeed * period;
 
-//	cout << fixed << setprecision(5);
-//	cout << "maxampl: " << maxAmplitude << " mm" << endl;
 }
 
 void Room::setSize(double sizeX, double sizeY)
@@ -157,7 +164,7 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 			abs(source.getY() - target.getY()) / 4 :
 			abs(source.getX() - target.getX()) / 4 ;
 
-	while (abs(sourceGradient) != abs(targetGradient))
+	while (abs(sourceGradient) != abs(targetGradient) && increment != 0)
 	{
 		reflPt = calcNextReflectionPoint(prevDir, increment, reflPt);
 
@@ -170,22 +177,18 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 		{
 			prevDir = currDir;
 			increment = increment / 2;
-			if (increment == 0)
-			{
-//				cout << "Increment is 0, exiting" << endl;
-				break;
-			}
 		}
 //		cout << "refl pt: " << reflPt
 //				<< ", next: " << to_string(currDir)
 //				<< ", incr: " << increment << '\n';
 	}
 
-	cout << sourceGradient << " " << targetGradient << endl;
+	//cout << sourceGradient << " " << targetGradient << endl;
 
 	if (sourceGradient == targetGradient)
 		return ReflectionPoint(-1, -1, wall);					// Collision with target in reflection path
 																// No reflection point
+
 	return reflPt;
 }
 
@@ -206,7 +209,7 @@ void Room::calcReflectionPoints()
 //			cout << "Invalid reflection point" << endl;
 		}
 	}
-	cout << endl;
+	//cout << endl;
 }
 
 void Room::calcDistances()
@@ -218,7 +221,7 @@ void Room::calcDistances()
 	distances.push_back(Point::calcDistance(source, target));
 //	cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
 
-	for (auto reflPt : reflectionPoints)
+	for (ReflectionPoint reflPt : reflectionPoints)
 	{
 		distances.push_back(Point::calcDistance(source, reflPt) + Point::calcDistance(reflPt, target));
 
@@ -226,25 +229,68 @@ void Room::calcDistances()
 	}
 }
 
-void Room::calcKiteresek()
+void Room::calcDisplacement()
 {
 	cout << fixed << setprecision(10);
-	{
-		double intensity = pow(10, -12 + (double)SPL / 10) / pow(to_meters(distances.front()), 2);
-		double time = distances.front() / 343.5;
-		double amplitude = sqrt(intensity / (2 * pow(M_PI, 2) * 1.2045 * 343.5 * pow(frequency, 2)));
-		kiteresek.push_back(amplitude * sin(2 * M_PI * (time / period - distances.front() / waveleght)));
-		cout << kiteresek.back() << endl;
-	}
+
+	double intensity = pow(10, -12 + soundPressureLevel / 10) / pow(to_meters(distances.front()), 2);
+	double time = to_meters(distances.front()) / propagationSpeed;
+	double amplitude = sqrt(intensity / (2 * pow(M_PI, 2) * airDensity * propagationSpeed * pow(frequency, 2)));
+
+	displacements.push_back(amplitude * sin(2 * M_PI * (time / period - distances.front() / waveleght)));
+
+//	cout << "amplitud: " << amplitude
+//			<< " ido: " << time
+//			<< " intensitas: " << intensity
+//			<< endl;
+//	cout << kiteresek.back() << endl;
 
 	for (int i = 1; i < (int)distances.size(); ++i)
 	{
-		double intensity = pow(10, -12 + (double)SPL / 10) / pow(to_meters(distances[i]), 2);
-		double time = distances[i] / 343.5;
-		double amplitude = sqrt(intensity * pow(10, 6) / (2 * pow(M_PI, 2) * 1.2045 * 343.5 * pow(frequency, 2)));
-		kiteresek.push_back(amplitude * sin(2 * M_PI * (time / period - (distances[i] + waveleght / 2) / waveleght)));
-		cout << kiteresek.back() << endl;
+		double intensity = pow(10, -12 + soundPressureLevel / 10) / pow(to_meters(distances[i]), 2);
+		double time = to_meters(distances[i]) / propagationSpeed;
+		double amplitude = sqrt(intensity / (2 * pow(M_PI, 2) * airDensity * propagationSpeed * pow(frequency, 2)));
+
+		displacements.push_back(amplitude * sin(2 * M_PI * (time / period - (distances[i] + waveleght / 2) / waveleght)));
+
+//		cout << "amplitud: " << amplitude
+//				<< " ido: " << time
+//				<< " intensitas: " << intensity
+//				<< endl;
+//		cout << kiteresek.back() << endl;
 	}
+}
+
+void Room::splAtTarget()
+{
+	double displX { 0 };
+	double displY { 0 };
+
+	displX += displacements.front() * cos(getAngle(source, target) * M_PI / 180.0);
+	displY += displacements.front() * sin(getAngle(source, target) * M_PI / 180.0);
+
+	for (size_t i = 0; i < reflectionPoints.size(); i++)
+	{
+		double angleRad = getAngle(reflectionPoints[i], target) * M_PI / 180.0;
+		double displ = displacements[i + 1];
+
+		displX += displ * cos(angleRad);
+		displY += displ * sin(angleRad);
+	}
+
+	double mainDispl = sqrt(pow(displX, 2) + pow(displY, 2));
+
+	cout << "amplitude: " << mainDispl;
+
+	double intensity = 2 * pow(M_PI, 2) * airDensity * pow(mainDispl, 2) * pow(frequency, 2) * propagationSpeed;
+
+	cout << ", intensity: " << intensity;
+
+	double SPL = 10 * log10(intensity / pow(10, -12));
+
+	cout << ", SPL: " << SPL << endl;
+
+
 }
 
 
