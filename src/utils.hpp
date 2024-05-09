@@ -17,6 +17,8 @@ struct Colors
 	const static sf::Color BLACK;
 	const static sf::Color RED;
 	const static sf::Color DARKGREY;
+	const static sf::Color LIGHTGREY;
+	const static sf::Color LIGHTGREEN;
 };
 
 double round_to_precision(double value, int decimal_places);

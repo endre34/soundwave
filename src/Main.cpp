@@ -4,50 +4,146 @@
  */
 
 #include <iostream>
+#include <unistd.h>
 #include <SFML/Graphics.hpp>
 
 #include "Room.hpp"
 #include "DrawRoom.hpp"
+#include "Button.hpp"
 #include "utils.hpp"
 
 using namespace std;
 using namespace sf;
 
 
+void creditsMenu(RenderWindow& window);
+
 int main()
 {
-	Room room(5.0, 5.0);			// szoba merete Meterben
-
-
-
-	room.setSource(Point(1.0, 3.0));
-	room.setTarget(Point(3.0, 4.0));
-	room.calcReflectionPoints();
-	room.setParams(57);
-	room.calcDistances();
-	room.calcDisplacement();
-
+	Room room(5.0, 5.0);
 	DrawRoom dRoom(room);
-	dRoom.setSize(640);
-	dRoom.createPoints();
-	dRoom.setMode(SHOW_REFLECTIONS);
 
 	Cursor arrowCursor;
-	arrowCursor.loadFromSystem(Cursor::Arrow);
-
 	Cursor handCursor;
-	handCursor.loadFromSystem(Cursor::Hand);
 
-
-	RenderWindow window(VideoMode(dRoom.getVisualizationSize().x, dRoom.getVisualizationSize().y), "Hanginterferencia modellezese");
+	RenderWindow window(VideoMode(500, 500), "Hanginterferencia modellezese");
 	window.setFramerateLimit(60);
+
+	Font* font{ new Font() };
+	font->loadFromFile("Media/noto_sans.ttf");
+	Text* title{ new Text() };
+	title->setFont(*font);
+	title->setCharacterSize(40);
+	title->setFillColor(Colors::BLACK);
+	title->setString(L"Hanginterferencia\nModellezése");
+	title->setOrigin(title->getGlobalBounds().width / 2 ,title->getGlobalBounds().height / 2);
+	title->setPosition(250, 100);
+
+	Button* start{ new Button(Vector2f(250, 75), Vector2f(250, 250)) };
+	Button* credits{ new Button(Vector2f(250, 75), Vector2f(250, 350)) };
+	Button* exit{ new Button(Vector2f(250, 75), Vector2f(250, 450)) };
+
+	start->setText("Start");
+	credits->setText("Credits");
+	exit->setText("Exit");
+
+	bool* atCredits{ new bool{false} };
 
 	if (window.hasFocus())
 	while (window.isOpen())
 	{
-		window.clear(Color(245, 245, 245));
-		window.draw(dRoom);
+		window.setSize(Vector2u(500, 500));
 
+		Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == Event::Closed)
+			{
+				goto END;
+			}
+
+		    if (event.type == sf::Event::Resized)
+		    {
+		        sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+		        window.setView(sf::View(visibleArea));
+		    }
+
+			if (event.type == Event::MouseMoved)
+			{
+				Vector2f mousePos(Mouse::getPosition(window));
+
+				start->highlight(start->isInside(mousePos));
+				credits->highlight(credits->isInside(mousePos));
+				exit->highlight(exit->isInside(mousePos));
+			}
+
+			if (event.type == Event::MouseButtonPressed)
+			{
+				Vector2f mousePos(Mouse::getPosition(window));
+
+				if (start->isInside(mousePos))
+				{
+					delete font;
+					delete title;
+					delete atCredits;
+					delete start;
+					delete credits;
+					delete exit;
+
+					goto START;
+				}
+
+				if (credits->isInside(mousePos))
+				{
+					*atCredits = true;
+				}
+
+				if (exit->isInside(mousePos))
+				{
+					goto END;
+				}
+			}
+		}
+
+		if (*atCredits)
+		{
+			creditsMenu(window);
+
+			*atCredits = false;
+		}
+
+		window.clear(Colors::LIGHTGREEN);
+
+		window.draw(*title);
+		window.draw(*start);
+		window.draw(*exit);
+		window.draw(*credits);
+
+		window.display();
+	}
+
+
+	START:
+	room.setSource(Point(1.0, 3.0));
+	room.setTarget(Point(3.0, 4.0));
+	room.calcReflectionPoints();
+	room.setParams(10000);
+	room.calcDistances();
+	room.calcDisplacement();
+
+	dRoom.setSize(640);
+	dRoom.createPoints();
+	dRoom.setMode(SHOW_REFLECTIONS);
+
+	arrowCursor.loadFromSystem(Cursor::Arrow);
+	handCursor.loadFromSystem(Cursor::Hand);
+
+	window.setSize(dRoom.getVisualizationSize());
+
+
+	if (window.hasFocus())
+	while (window.isOpen())
+	{
 		Event event;
 		while (window.pollEvent(event))
 		{
@@ -121,11 +217,69 @@ int main()
 		    }
 		}
 
-		Color blue(75, 75, 75);
-
+		window.clear(Colors::LIGHTGREY);
+		window.draw(dRoom);
 		window.display();
 	}
 
 
-    return 0;
+    END: return 0;
+}
+
+
+
+void creditsMenu(RenderWindow& window)
+{
+	Button back(Vector2f(250, 75), Vector2f(250, 350));
+	back.setText("Back");
+
+	Font font;
+	font.loadFromFile("Media/noto_sans.ttf");
+
+	Text credits;
+	credits.setFont(font);
+	credits.setFillColor(Colors::BLACK);
+	credits.setCharacterSize(30);
+	credits.setString(L"Készítette: Farkas Endre\n\nTémavezető tanár: Bartyik Zita");
+	credits.setOrigin(credits.getGlobalBounds().width / 2, credits.getGlobalBounds().height / 2);
+	credits.setPosition(250, 150);
+
+	if (window.hasFocus())
+	while (window.isOpen())
+	{
+		window.setSize(Vector2u(500, 500));
+
+		Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == Event::Closed)
+			{
+				window.close();
+			}
+
+			if (event.type == Event::MouseMoved)
+			{
+				Vector2f mousePos(Mouse::getPosition(window));
+
+				back.highlight(back.isInside(mousePos));
+			}
+
+			if (event.type == Event::MouseButtonPressed)
+			{
+				Vector2f mousePos(Mouse::getPosition(window));
+
+				if (back.isInside(mousePos))
+				{
+					return;
+				}
+			}
+		}
+
+		window.clear(Colors::LIGHTGREEN);
+
+		window.draw(back);
+		window.draw(credits);
+
+		window.display();
+	}
 }

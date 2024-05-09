@@ -14,6 +14,8 @@ const sf::Color Colors::CYAN(50, 250, 250);
 const sf::Color Colors::BLACK(0, 0, 0);
 const sf::Color Colors::RED(240, 75, 75);
 const sf::Color Colors::DARKGREY(75, 75, 75);
+const sf::Color Colors::LIGHTGREY(245, 245, 245);
+const sf::Color Colors::LIGHTGREEN(150, 200, 140);
 
 
 double round_to_precision(double value, int decimal_places)
