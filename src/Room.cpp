@@ -5,11 +5,18 @@
 
 #include <cmath>
 #include <iomanip>
+#include <iostream>
+#include <unistd.h>
 
 #include "Room.hpp"
 #include "utils.hpp"
 
 using namespace std;
+
+
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
 
 
 Room::Room(double sizeX, double sizeY) : // @suppress("Class members should be properly initialized")
@@ -61,9 +68,16 @@ string Room::to_string(Direction dir)
 
 Room::Direction Room::calcDirection(Wall wall, double sourceGradient, double targetGradient)
 {
-	return (wall == Right || wall == Left) ?
+	Direction direction =  (wall == Right || wall == Left) ?
 			(abs(sourceGradient) > abs(targetGradient) ? TOWARD_SOURCE : TOWARD_TARGET) :
 			(abs(sourceGradient) < abs(targetGradient) ? TOWARD_SOURCE : TOWARD_TARGET) ;
+
+	if (sgn(sourceGradient) == sgn(targetGradient))
+	{
+		direction = direction == TOWARD_SOURCE ? TOWARD_TARGET : TOWARD_SOURCE;
+	}
+
+	return direction;
 }
 
 ReflectionPoint Room::calcInitalReflectionPoint(Wall wall)
@@ -116,6 +130,47 @@ double Room::getAngle(const Point& point1, const Point& point2)
 	return angle;
 }
 
+int Room::xRange(int x)
+{
+	if (x <= 0)
+		return 10;
+	else if (x >= sizeX)
+		return sizeX - 10;
+	else
+		return x;
+}
+
+int Room::yRange(int y)
+{
+	if (y <= 0)
+		return 10;
+	else if (y >= sizeY)
+		return sizeY - 10;
+	else
+		return y;
+}
+
+void Room::calcDisplOnly()
+{
+	displacements.clear();
+	cout << fixed << setprecision(10);
+
+	double intensity = pow(10, -12 + soundPressureLevel / 10);
+	double time = to_meters(distances.front()) / propagationSpeed;
+	double amplitude = sqrt(intensity / (2 * pow(M_PI, 2) * airDensity * propagationSpeed * pow(frequency, 2)));
+
+	displacements.push_back(amplitude * sin(2 * M_PI * (time / period - distances.front() / waveleght)));
+
+	for (int i = 1; i < (int)distances.size(); ++i)
+	{
+		double intensity = pow(10, -12 + soundPressureLevel / 10) / pow(to_meters(distances[i]), 2);
+		double time = to_meters(distances[i]) / propagationSpeed;
+		double amplitude = sqrt(intensity / (2 * pow(M_PI, 2) * airDensity * propagationSpeed * pow(frequency, 2)));
+
+		displacements.push_back(amplitude * sin(2 * M_PI * (time / period - (distances[i] + waveleght / 2) / waveleght)));
+	}
+}
+
 void Room::setSource(const Point& source)
 {
 	this->source = source;
@@ -161,8 +216,8 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 
 	// Muszaly 4 legyen maskent atszokik a target-en
 	int increment = (wall == Right || wall == Left) ?
-			abs(source.getY() - target.getY()) / 4 :
-			abs(source.getX() - target.getX()) / 4 ;
+			abs(source.getY() - target.getY()) / 6 :
+			abs(source.getX() - target.getX()) / 6 ;
 
 	while (abs(sourceGradient) != abs(targetGradient) && increment != 0)
 	{
@@ -181,9 +236,9 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 //		cout << "refl pt: " << reflPt
 //				<< ", next: " << to_string(currDir)
 //				<< ", incr: " << increment << '\n';
-	}
 
-	//cout << sourceGradient << " " << targetGradient << endl;
+		//usleep(10 * 1000);
+	}
 
 	if (sourceGradient == targetGradient)
 		return ReflectionPoint(-1, -1, wall);					// Collision with target in reflection path
@@ -219,7 +274,7 @@ void Room::calcDistances()
 	cout << fixed << setprecision(3) << setfill(' ');
 
 	distances.push_back(Point::calcDistance(source, target));
-	cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
+	//cout << "Distance: " << setw(6) << to_meters(distances.back()) << endl;
 
 	for (ReflectionPoint reflPt : reflectionPoints)
 	{
@@ -262,7 +317,7 @@ void Room::calcDisplacement()
 	}
 }
 
-void Room::splAtTarget()
+double Room::getTargetSPL()
 {
 	double displX { 0 };
 	double displY { 0 };
@@ -280,19 +335,77 @@ void Room::splAtTarget()
 	}
 
 	double mainDispl = sqrt(pow(displX, 2) + pow(displY, 2));
-
-	cout << "main_displacement: " << mainDispl;
-
 	double intensity = 2 * pow(M_PI, 2) * airDensity * pow(mainDispl, 2) * pow(frequency, 2) * propagationSpeed;
-
-	cout << ", intensity: " << intensity;
-
 	double SPL = 10 * log10(intensity / pow(10, -12));
 
-	cout << ", SPL: " << SPL << endl;
+	//cout << "SPL: " << SPL << endl;
 
-
+	return SPL;
 }
+
+void Room::calcBestPos()
+{
+	Point originalPos(target);
+
+	calcReflectionPoints();
+	calcDistances();
+	calcDisplOnly();
+
+	double bestSPL = getTargetSPL();
+	int increment = to_millis(waveleght) / (10 * log10(to_millis(waveleght)));
+
+	cout << increment << endl;
+
+	int startX = xRange(target.getX() - to_millis(waveleght / log10(to_millis(waveleght))));
+	int startY = yRange(target.getY() - to_millis(waveleght / log10(to_millis(waveleght))));
+
+	int endX = xRange(target.getX() + to_millis(waveleght / log10(to_millis(waveleght))));
+	int endY = yRange(target.getY() + to_millis(waveleght / log10(to_millis(waveleght))));
+
+	target.setCoords(startX, startY);
+
+	while (target.getX() < endX && target.getY() < endY)
+	{
+		if (Point::calcDistance(source, target) >= 200)
+		{
+//			cout << source << endl;
+//			cout << target << endl;
+			calcReflectionPoints();
+			calcDistances();
+			calcDisplOnly();
+
+			double currSPL = getTargetSPL();
+
+			if (bestSPL < currSPL)
+			{
+				bestSPL = currSPL;
+				optimalPosition = target;
+			}
+		}
+
+		int valami = xRange(target.getX() + increment);
+		target.setCoords(valami, target.getY());
+
+		if (target.getX() >= endX)
+		{
+			valami = yRange(target.getY() + increment);
+			target.setCoords(startX, valami);
+
+			if (target.getY() >= endY)
+				break;
+		}
+	}
+
+	target = originalPos;
+
+	cout << "Best interference @: " << optimalPosition << ", with an approx. SPL of: " << bestSPL << endl;
+
+	calcReflectionPoints();
+	calcDistances();
+	calcDisplacement();
+}
+
+
 
 
 

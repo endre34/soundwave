@@ -6,7 +6,6 @@
 #ifndef POINT_HPP_
 #define POINT_HPP_
 
-#include <iostream>
 
 enum Wall
 {
@@ -24,9 +23,9 @@ public:
 	Point(const Point& point);
 	Point();
 
-	void setCoords(double x, double y);
-	void setX(double x);
-	void setY(double y);
+//	void setCoords(double x, double y);
+//	void setX(double x);
+//	void setY(double y);
 
 	void setCoords(int x, int y);
 	void setX(int x);

@@ -5,7 +5,6 @@
 
 #include <iostream>
 #include <iomanip>
-#include <unistd.h>
 #include <cmath>
 
 #include "DrawRoom.hpp"
@@ -71,11 +70,7 @@ void DrawRoom::setMode(Mode mode)
 	case SHOW_REFLECTIONS:
 		if (this->mode != mode)
 		{
-			cout << endl;
-			room.calcReflectionPoints();
-			room.calcDistances();
-			room.calcDisplacement();
-			room.splAtTarget();
+			room.calcBestPos();
 
 			createReflectionPoints();
 			createWaveDir();

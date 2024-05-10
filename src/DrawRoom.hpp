@@ -70,6 +70,7 @@ private:
 
 	sf::CircleShape source;
 	Target target;
+	sf::CircleShape optimalPosition;
 
 //	Mode: SHOW_REFLECTIONS
 	std::vector<sf::VertexArray> reflectionPoints;

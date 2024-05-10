@@ -39,21 +39,21 @@ Point::Point() :
 	// empty
 }
 
-void Point::setCoords(double x, double y)
-{
-	setX(x);
-	setY(y);
-}
-
-void Point::setX(double x)
-{
-	this->x = static_cast<int>(x * 1000.0);
-}
-
-void Point::setY(double y)
-{
-	this->y = static_cast<int>(y * 1000.0);
-}
+//void Point::setCoords(double x, double y)
+//{
+//	setX(x);
+//	setY(y);
+//}
+//
+//void Point::setX(double x)
+//{
+//	this->x = static_cast<int>(x * 1000.0);
+//}
+//
+//void Point::setY(double y)
+//{
+//	this->y = static_cast<int>(y * 1000.0);
+//}
 
 void Point::setCoords(int x, int y)
 {

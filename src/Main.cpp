@@ -4,7 +4,6 @@
  */
 
 #include <iostream>
-#include <unistd.h>
 #include <SFML/Graphics.hpp>
 
 #include "Room.hpp"
@@ -20,7 +19,7 @@ void creditsMenu(RenderWindow& window);
 
 int main()
 {
-	Room room(5.0, 5.0);
+	Room room(2.0, 2.0);
 	DrawRoom dRoom(room);
 
 	Cursor arrowCursor;
@@ -124,10 +123,10 @@ int main()
 
 
 	START:
-	room.setSource(Point(1.0, 3.0));
-	room.setTarget(Point(3.0, 4.0));
+	room.setSource(Point(0.5, 0.5));
+	room.setTarget(Point(1.0, 1.0));
 	room.calcReflectionPoints();
-	room.setParams(10000);
+	room.setParams(57);
 	room.calcDistances();
 	room.calcDisplacement();
 

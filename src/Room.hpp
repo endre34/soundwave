@@ -29,7 +29,8 @@ public:
 	void calcReflectionPoints();
 	void calcDistances();
 	void calcDisplacement();
-	void splAtTarget();
+	double getTargetSPL();
+	void calcBestPos();
 
 	ReflectionPoint calcReflectionPoint(Wall wall);
 
@@ -42,8 +43,9 @@ public:
 private:
 	int sizeX, sizeY;
 	Point source, target;
-	std::vector<ReflectionPoint> reflectionPoints;
+	Point optimalPosition;
 
+	std::vector<ReflectionPoint> reflectionPoints;
 	std::vector<int> distances;
 	std::vector<double> displacements;
 
@@ -64,6 +66,9 @@ private:
 	ReflectionPoint calcInitalReflectionPoint(Wall wall);
 	ReflectionPoint calcNextReflectionPoint(Direction direction, int increment, const ReflectionPoint& reflectionP);
 	double getAngle(const Point& point1, const Point& point2);
+	int xRange(int x);
+	int yRange(int y);
+	void calcDisplOnly();
 };
 
 
