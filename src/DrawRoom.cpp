@@ -7,8 +7,8 @@
 #include <iomanip>
 #include <cmath>
 
-#include "DrawRoom.hpp"
-#include "utils.hpp"
+#include "Header_files/DrawRoom.hpp"
+#include "Header_files/utils.hpp"
 
 using namespace std;
 using namespace sf;
@@ -70,10 +70,18 @@ void DrawRoom::setMode(Mode mode)
 	case SHOW_REFLECTIONS:
 		if (this->mode != mode)
 		{
+			room.calcReflectionPoints();
+			room.calcDistances();
+			room.calcDisplacement();
+
+			cout << endl;
+			cout << fixed << setprecision(3);
+			cout << "Hangintenzitas a hallgatonal: " << room.getTargetSPL() << endl;
 			room.calcBestPos();
 
 			createReflectionPoints();
 			createWaveDir();
+			createBestPos();
 
 			this->mode = mode;
 		}
@@ -296,6 +304,16 @@ void DrawRoom::createWaveDir()
 		waveDirections.emplace_back(reflectionPoints[i][0].position, target.getPosition());
 	}
 	waveDirections.emplace_back(source.getPosition(), target.getPosition());
+}
+
+void DrawRoom::createBestPos()
+{
+	optimalPosition.setRadius(15);
+	optimalPosition.setFillColor(Colors::TRANSPARENTGREEN);
+	optimalPosition.setOrigin(optimalPosition.getRadius(), optimalPosition.getRadius());
+	optimalPosition.setPosition(bounds.getPosition().x + millisToPixels(room.optimalPosition.getX()),
+								bounds.getPosition().y + millisToPixels(room.optimalPosition.getY()));
+
 }
 
 void DrawRoom::calcTransformRatio()

@@ -7,9 +7,9 @@
 #include <iostream>
 #include <iomanip>
 
-#include "ComplexShapes.hpp"
-#include "Point.hpp"
-#include "utils.hpp"
+#include "Header_files/ComplexShapes.hpp"
+#include "Header_files/Point.hpp"
+#include "Header_files/utils.hpp"
 
 
 using namespace std;

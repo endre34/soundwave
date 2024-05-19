@@ -6,8 +6,8 @@
 #include <iomanip>
 #include <cmath>
 
-#include "Point.hpp"
-#include "utils.hpp"
+#include "Header_files/Point.hpp"
+#include "Header_files/utils.hpp"
 
 using namespace std;
 

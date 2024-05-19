@@ -87,6 +87,7 @@ private:
 
 	void createReflectionPoints();
 	void createWaveDir();
+	void createBestPos();
 	void calcTransformRatio();
 
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;

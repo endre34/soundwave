@@ -5,7 +5,7 @@
 
 #include <cmath>
 
-#include "utils.hpp"
+#include "Header_files/utils.hpp"
 
 
 const sf::Color Colors::BLUE(0, 0, 255);
@@ -16,7 +16,7 @@ const sf::Color Colors::RED(240, 75, 75);
 const sf::Color Colors::DARKGREY(75, 75, 75);
 const sf::Color Colors::LIGHTGREY(245, 245, 245);
 const sf::Color Colors::LIGHTGREEN(150, 200, 140);
-const sf::Color Colors::TRANSPARENTGREEN(150, 200, 140, 150);
+const sf::Color Colors::TRANSPARENTGREEN(150, 200, 140);
 
 
 double round_to_precision(double value, int decimal_places)

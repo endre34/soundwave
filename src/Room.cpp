@@ -8,8 +8,8 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "Room.hpp"
-#include "utils.hpp"
+#include "Header_files/Room.hpp"
+#include "Header_files/utils.hpp"
 
 using namespace std;
 
@@ -338,33 +338,31 @@ double Room::getTargetSPL()
 	double intensity = 2 * pow(M_PI, 2) * airDensity * pow(mainDispl, 2) * pow(frequency, 2) * propagationSpeed;
 	double SPL = 10 * log10(intensity / pow(10, -12));
 
-	//cout << "SPL: " << SPL << endl;
+	//cout << "Hangintenzitas a hallgatonal: " << SPL << endl;
 
 	return SPL;
 }
 
 void Room::calcBestPos()
 {
-	Point originalPos(target);
+	Point originalPos(source);
 
 	calcReflectionPoints();
 	calcDistances();
 	calcDisplOnly();
 
 	double bestSPL = getTargetSPL();
-	int increment = to_millis(waveleght) / (10 * log10(to_millis(waveleght)));
+	int increment = 10;
 
-	cout << increment << endl;
+	int startX = xRange(source.getX() - to_millis(0.5));
+	int startY = yRange(source.getY() - to_millis(0.5));
 
-	int startX = xRange(target.getX() - to_millis(waveleght / log10(to_millis(waveleght))));
-	int startY = yRange(target.getY() - to_millis(waveleght / log10(to_millis(waveleght))));
+	int endX = xRange(source.getX() + to_millis(0.5));
+	int endY = yRange(source.getY() + to_millis(0.5));
 
-	int endX = xRange(target.getX() + to_millis(waveleght / log10(to_millis(waveleght))));
-	int endY = yRange(target.getY() + to_millis(waveleght / log10(to_millis(waveleght))));
+	source.setCoords(startX, startY);
 
-	target.setCoords(startX, startY);
-
-	while (target.getX() < endX && target.getY() < endY)
+	while (source.getX() < endX && source.getY() < endY)
 	{
 		if (Point::calcDistance(source, target) >= 200)
 		{
@@ -379,26 +377,26 @@ void Room::calcBestPos()
 			if (bestSPL < currSPL)
 			{
 				bestSPL = currSPL;
-				optimalPosition = target;
+				optimalPosition = source;
 			}
 		}
 
-		int valami = xRange(target.getX() + increment);
-		target.setCoords(valami, target.getY());
+		int valami = xRange(source.getX() + increment);
+		source.setCoords(valami, source.getY());
 
-		if (target.getX() >= endX)
+		if (source.getX() >= endX)
 		{
-			valami = yRange(target.getY() + increment);
-			target.setCoords(startX, valami);
+			valami = yRange(source.getY() + increment);
+			source.setCoords(startX, valami);
 
 			if (target.getY() >= endY)
 				break;
 		}
 	}
 
-	target = originalPos;
+	source = originalPos;
 
-	cout << "Best interference @: " << optimalPosition << ", with an approx. SPL of: " << bestSPL << endl;
+	cout << "Legjobb interferencia @" << optimalPosition << endl;
 
 	calcReflectionPoints();
 	calcDistances();

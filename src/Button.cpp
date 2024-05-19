@@ -3,8 +3,8 @@
  *   Author: Endre
  */
 
-#include "Button.hpp"
-#include "utils.hpp"
+#include "Header_files/Button.hpp"
+#include "Header_files/utils.hpp"
 
 using namespace std;
 using namespace sf;

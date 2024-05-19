@@ -6,10 +6,10 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
-#include "Room.hpp"
-#include "DrawRoom.hpp"
-#include "Button.hpp"
-#include "utils.hpp"
+#include "Header_files/Room.hpp"
+#include "Header_files/DrawRoom.hpp"
+#include "Header_files/Button.hpp"
+#include "Header_files/utils.hpp"
 
 using namespace std;
 using namespace sf;
@@ -19,7 +19,7 @@ void creditsMenu(RenderWindow& window);
 
 int main()
 {
-	Room room(2.0, 2.0);
+	Room room(8.0, 5.0);
 	DrawRoom dRoom(room);
 
 	Cursor arrowCursor;
@@ -123,10 +123,10 @@ int main()
 
 
 	START:
-	room.setSource(Point(0.5, 0.5));
-	room.setTarget(Point(1.0, 1.0));
+	room.setSource(Point(3.0, 3.0));
+	room.setTarget(Point(5.0, 2.5));
 	room.calcReflectionPoints();
-	room.setParams(57);
+	room.setParams(1000);
 	room.calcDistances();
 	room.calcDisplacement();
 
@@ -216,7 +216,7 @@ int main()
 		    }
 		}
 
-		window.clear(Colors::LIGHTGREY);
+		window.clear(Colors::WHITE);
 		window.draw(dRoom);
 		window.display();
 	}
