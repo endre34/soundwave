@@ -54,6 +54,21 @@ void Button::setText(string text)
 	this->text.setPosition(pos);
 }
 
+string Button::getText() const
+{
+	return text.getString();
+}
+
+void Button::setPos(const Vector2f& position)
+{
+	body.setPosition(position);
+}
+
+void Button::setSize(const Vector2f& size)
+{
+	body.setSize(size);
+}
+
 bool Button::isInside(const Vector2f& mousePos)
 {
 	FloatRect bounds = body.getGlobalBounds();
@@ -79,4 +94,40 @@ void Button::draw(RenderTarget& target, RenderStates states) const
 
 	target.draw(text, states);
 }
+
+void TextField::select()
+{
+	selected = true;
+
+	body.setOutlineColor(Colors::RED);
+	body.setOutlineThickness(6.0);
+}
+
+void TextField::deselect()
+{
+	selected = false;
+
+	body.setOutlineColor(Colors::BLACK);
+	body.setOutlineThickness(1.0);
+}
+
+void TextField::highlight(bool state)
+{
+	if (state && !selected)
+	{
+		body.setOutlineThickness(6.0);
+	}
+	else
+	{
+		body.setOutlineThickness(1.0);
+	}
+}
+
+
+
+
+
+
+
+
 

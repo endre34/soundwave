@@ -223,6 +223,8 @@ ReflectionPoint Room::calcReflectionPoint(Wall wall)
 	{
 		reflPt = calcNextReflectionPoint(prevDir, increment, reflPt);
 
+		//reflectionPoints.push_back(reflPt);
+
 		sourceGradient = Point::calcGradient(source, reflPt);
 		targetGradient = Point::calcGradient(target, reflPt);
 

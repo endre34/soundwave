@@ -10,6 +10,7 @@
 #include "Header_files/DrawRoom.hpp"
 #include "Header_files/Button.hpp"
 #include "Header_files/utils.hpp"
+#include "Header_files/Menus.hpp"
 
 using namespace std;
 using namespace sf;
@@ -19,8 +20,9 @@ void creditsMenu(RenderWindow& window);
 
 int main()
 {
-	Room room(8.0, 5.0);
+	Room room(5, 5);
 	DrawRoom dRoom(room);
+	sideMenu menu(Vector2f(250, dRoom.getVisualizationSize().y), dRoom.getVisualizationSize().x);
 
 	Cursor arrowCursor;
 	Cursor handCursor;
@@ -137,7 +139,9 @@ int main()
 	arrowCursor.loadFromSystem(Cursor::Arrow);
 	handCursor.loadFromSystem(Cursor::Hand);
 
-	window.setSize(dRoom.getVisualizationSize());
+	menu.setSize(Vector2f(250, dRoom.getVisualizationSize().y));
+	menu.setBegin((float)dRoom.getVisualizationSize().x);
+	window.setSize(Vector2u(dRoom.getVisualizationSize().x + (unsigned int)menu.getSize().x, dRoom.getVisualizationSize().y));
 
 
 	if (window.hasFocus())
@@ -153,13 +157,18 @@ int main()
 
 		    if (event.type == sf::Event::Resized)
 		    {
-		    	dRoom.setSize(event.size.width - dRoom.getExtension() * 2);
+		    	dRoom.setSize(event.size.width - dRoom.getExtension() * 2 - (int)menu.getSize().x);
 
 		    	dRoom.createPoints();
 		    	dRoom.resetMode();
 
-		    	window.setSize(dRoom.getVisualizationSize());
-		        sf::FloatRect visibleArea(0, 0, dRoom.getVisualizationSize().x, dRoom.getVisualizationSize().y);
+		    	menu.setSize(Vector2f(250, dRoom.getVisualizationSize().y));
+				menu.setBegin((float)dRoom.getVisualizationSize().x);
+		    	window.setSize(Vector2u(dRoom.getVisualizationSize().x + (unsigned int)menu.getSize().x, dRoom.getVisualizationSize().y));
+
+		    	cout << menu.getBegin() << endl;
+
+		        sf::FloatRect visibleArea(0, 0, dRoom.getVisualizationSize().x + (int)menu.getSize().x, dRoom.getVisualizationSize().y);
 		        window.setView(sf::View(visibleArea));
 		    }
 
@@ -218,6 +227,7 @@ int main()
 
 		window.clear(Colors::WHITE);
 		window.draw(dRoom);
+		window.draw(menu);
 		window.display();
 	}
 
@@ -239,7 +249,7 @@ void creditsMenu(RenderWindow& window)
 	credits.setFont(font);
 	credits.setFillColor(Colors::BLACK);
 	credits.setCharacterSize(30);
-	credits.setString(L"Készítette: Farkas Endre\n\nTémavezető tanár: Bartyik Zita");
+	credits.setString(L"Készítette: Farkas Endre\n\nTémavezető tanár: Mauzer Erika");
 	credits.setOrigin(credits.getGlobalBounds().width / 2, credits.getGlobalBounds().height / 2);
 	credits.setPosition(250, 150);
 
