@@ -49,6 +49,7 @@ public:
 	void movePoint();
 
 
+
 	int getExtension();
 
 	sf::FloatRect getSourceBounds();
@@ -71,6 +72,7 @@ private:
 	sf::CircleShape source;
 	Target target;
 	sf::CircleShape optimalPosition;
+	bool showOptimalPos = false;
 
 //	Mode: SHOW_REFLECTIONS
 	std::vector<sf::VertexArray> reflectionPoints;

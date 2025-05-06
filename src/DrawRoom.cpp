@@ -369,6 +369,11 @@ void DrawRoom::draw(RenderTarget& target, RenderStates states) const
 		break;
 	}
 
+	if (showOptimalPos)
+	{
+		target.draw(this->optimalPosition, states);
+	}
+
 	target.draw(this->source, states);
 	target.draw(this->target, states);
 }

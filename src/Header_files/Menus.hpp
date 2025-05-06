@@ -42,6 +42,10 @@ private:
 	sf::Text positions_title;
 	Button bestPos;
 
+	sf::Text sound_title;
+	sf::Text sound;
+	TextField hertz;
+
 	Button back;
 
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const override;

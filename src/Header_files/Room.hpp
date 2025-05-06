@@ -26,6 +26,10 @@ public:
 	Point getSource();
 	Point getTarget();
 
+	int getFrequency();
+	double getSizeX();
+	double getSizeY();
+
 	void calcReflectionPoints();
 	void calcDistances();
 	void calcDisplacement();

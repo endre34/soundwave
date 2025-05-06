@@ -49,6 +49,8 @@ public:
 
 	void select();
 	void deselect();
+
+	bool getState() const;
 private:
 
 	bool selected;

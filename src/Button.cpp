@@ -13,7 +13,7 @@ Button::Button()
 {
 	body.setFillColor(Colors::LIGHTGREY);
 	body.setOutlineColor(Colors::BLACK);
-	body.setOutlineThickness(3);
+	body.setOutlineThickness(1.5);
 
 	font.loadFromFile("Media/noto_sans.ttf");
 	text.setFont(font);
@@ -56,7 +56,7 @@ void Button::highlight(bool state)
 
 void Button::setText(string text)
 {
-	Vector2f pos = this->text.getPosition();
+	Vector2f pos = body.getPosition();
 
 
 	this->text.setString(text);
@@ -73,6 +73,7 @@ string Button::getText() const
 void Button::setPos(const Vector2f& position)
 {
 	body.setPosition(position);
+	text.setPosition(position);
 }
 
 void Button::setSize(const Vector2f& size)
@@ -128,7 +129,11 @@ void TextField::deselect()
 
 void TextField::highlight(bool state)
 {
-	if (state && !selected)
+	if (selected)
+	{
+		body.setOutlineThickness(6.0);
+	}
+	else if (state)
 	{
 		body.setOutlineThickness(6.0);
 	}
@@ -136,6 +141,11 @@ void TextField::highlight(bool state)
 	{
 		body.setOutlineThickness(1.0);
 	}
+}
+
+bool TextField::getState() const
+{
+	return selected;
 }
 
 

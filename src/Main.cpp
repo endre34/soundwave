@@ -30,6 +30,7 @@ int main()
 	RenderWindow window(VideoMode(500, 500), "Hanginterferencia modellezese");
 	window.setFramerateLimit(60);
 
+	BEGIN:
 	Font* font{ new Font() };
 	font->loadFromFile("Media/noto_sans.ttf");
 	Text* title{ new Text() };
@@ -176,6 +177,8 @@ int main()
 		    {
 		    	Vector2f mousePos(event.mouseMove.x, event.mouseMove.y);
 
+		    	menu.checkAction(event, mousePos);
+
 	    		if (Mouse::isButtonPressed(Mouse::Left) && dRoom.getMovedPoint() != NOTHING)
 	    		{
 	    			dRoom.setMoveEnd(mousePos);
@@ -200,6 +203,8 @@ int main()
 		    	FloatRect sourceBox = dRoom.getSourceBounds();
 		    	FloatRect targetBox = dRoom.getTargetBounds();
 
+		    	string action = menu.checkAction(event, mousePos);
+
 		    	if (sourceBox.contains(mousePos))
 		    	{
 		    		dRoom.setMoveBegin(mousePos);
@@ -216,6 +221,11 @@ int main()
 
 		    		dRoom.setMode(SHOW_DISTANCES);
 		    	}
+
+			    if (action == "back")
+			    {
+			    	goto BEGIN;
+			    }
 		    }
 		    else if (event.type == sf::Event::MouseButtonReleased)
 		    {

@@ -51,6 +51,21 @@ Room::Room() : // @suppress("Class members should be properly initialized")
 	// empty
 }
 
+int Room::getFrequency()
+{
+	return frequency;
+}
+
+double Room::getSizeX()
+{
+	return to_meters(sizeX);
+}
+
+double Room::getSizeY()
+{
+	return to_meters(sizeY);
+}
+
 string Room::to_string(Direction dir)
 {
 	switch (dir)

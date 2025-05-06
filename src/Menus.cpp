@@ -26,6 +26,8 @@ sideMenu::sideMenu(Vector2f size, float fromWidth)
 	roomSize_y.setFont(font);
 	reflections_title.setFont(font);
 	positions_title.setFont(font);
+	sound_title.setFont(font);
+	sound.setFont(font);
 
 	menu_title.setStyle(Text::Bold);
 	roomSize_title.setStyle(Text::Bold);
@@ -33,6 +35,8 @@ sideMenu::sideMenu(Vector2f size, float fromWidth)
 	roomSize_y.setStyle(Text::Regular);
 	reflections_title.setStyle(Text::Bold);
 	positions_title.setStyle(Text::Bold);
+	sound_title.setStyle(Text::Bold);
+	sound.setStyle(Text::Regular);
 
 	menu_title.setFillColor(Colors::BLACK);
 	roomSize_title.setFillColor(Colors::BLACK);
@@ -40,6 +44,8 @@ sideMenu::sideMenu(Vector2f size, float fromWidth)
 	roomSize_y.setFillColor(Colors::BLACK);
 	reflections_title.setFillColor(Colors::BLACK);
 	positions_title.setFillColor(Colors::BLACK);
+	sound_title.setFillColor(Colors::BLACK);
+	sound.setFillColor(Colors::BLACK);
 
 	menu_title.setCharacterSize(24);
 	menu_title.setString("MENU");
@@ -61,23 +67,123 @@ sideMenu::sideMenu(Vector2f size, float fromWidth)
 	roomSize_y.setOrigin(roomSize_y.getGlobalBounds().width / 2, roomSize_y.getGlobalBounds().height / 2);
 	roomSize_y.setPosition(fromWidth + mainBody.getSize().x / 2 - 50, 150);
 
+	reflections_title.setCharacterSize(24);
+	reflections_title.setString("Reflections");
+	reflections_title.setOrigin(reflections_title.getGlobalBounds().width / 2, reflections_title.getGlobalBounds().height / 2);
+	reflections_title.setPosition(fromWidth + mainBody.getSize().x / 2, 200);
+
+	positions_title.setCharacterSize(24);
+	positions_title.setString("Best Position");
+	positions_title.setOrigin(positions_title.getGlobalBounds().width / 2, positions_title.getGlobalBounds().height / 2);
+	positions_title.setPosition(fromWidth + mainBody.getSize().x / 2, 325);
+
+	sound_title.setCharacterSize(24);
+	sound_title.setString("Soundwave");
+	sound_title.setOrigin(sound_title.getGlobalBounds().width / 2, sound_title.getGlobalBounds().height / 2);
+	sound_title.setPosition(fromWidth + mainBody.getSize().x / 2, 450);
+
+	sound.setCharacterSize(18);
+	sound.setString("Hz:");
+	sound.setOrigin(sound.getGlobalBounds().width / 2, sound.getGlobalBounds().height / 2);
+	sound.setPosition(fromWidth + mainBody.getSize().x / 2 - 65, 490);
+
 	//#########################################	buttons	#################################
 
-	reflections.setSize(Vector2f(50, 50));
-	reflections.setPos(Vector2f(fromWidth + 50, 150));
-	bestPos.setSize(Vector2f(50, 50));
-	bestPos.setPos(Vector2f(fromWidth + 50, 225));
-	back.setSize(Vector2f(50, 50));
-	back.setPos(Vector2f(fromWidth + 50, 300));
+	reflections.setSize(Vector2f(150, 50));
+	reflections.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 250));
+	bestPos.setSize(Vector2f(150, 50));
+	bestPos.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 375));
+	back.setSize(Vector2f(150, 50));
+	back.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 575));
+
+	back.setText("Back");
 
 	//#########################################	textbox	#################################
 
 	x.setSize(Vector2f(70, 30));
-	x.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 110));
+	x.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 113));
 	y.setSize(Vector2f(70, 30));
-	y.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 150));
+	y.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 153));
+	hertz.setSize(Vector2f(70, 30));
+	hertz.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 490));
 
 }
+
+string sideMenu::checkAction(sf::Event& event, sf::Vector2f& mousePos)
+{
+	if (event.type == sf::Event::MouseMoved)
+	{
+		reflections.highlight(reflections.isInside(mousePos));
+		bestPos.highlight(bestPos.isInside(mousePos));
+		back.highlight(back.isInside(mousePos));
+
+		x.highlight(x.isInside(mousePos));
+		y.highlight(y.isInside(mousePos));
+		hertz.highlight(hertz.isInside(mousePos));
+	}
+
+	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+	{
+		// Buttons
+		if (reflections.isInside(mousePos)) return "reflections";
+		if (bestPos.isInside(mousePos)) return "bestPos";
+		if (back.isInside(mousePos)) return "back";
+
+		x.deselect();
+		y.deselect();
+		hertz.deselect();
+
+		if (x.isInside(mousePos))
+		{
+			if (x.getState())
+			{
+				x.deselect();
+				return "";
+			}
+			else
+			{
+				x.select(); y.deselect(); hertz.deselect();
+				return "x";
+			}
+		}
+
+		if (y.isInside(mousePos))
+		{
+			if (y.getState())
+			{
+				y.deselect();
+				return "";
+			}
+			else
+			{
+				y.select(); x.deselect(); hertz.deselect();
+				return "y";
+			}
+		}
+
+		if (hertz.isInside(mousePos))
+		{
+			if (hertz.getState())
+			{
+				hertz.deselect();
+				return "";
+			}
+			else
+			{
+				hertz.select(); x.deselect(); y.deselect();
+				return "hertz";
+			}
+		}
+
+		x.deselect();
+		y.deselect();
+		hertz.deselect();
+	}
+
+	return "";
+}
+
+
 
 void sideMenu::setSize(Vector2f size)
 {
@@ -92,19 +198,24 @@ void sideMenu::setBegin(float fromWidth)
 
 	menu_title.setPosition(fromWidth + mainBody.getSize().x / 2, 25);
 	roomSize_title.setPosition(fromWidth + mainBody.getSize().x / 2, 75);
-	roomSize_x.setPosition(fromWidth + mainBody.getSize().x / 2 - 50, 110);
-	roomSize_y.setPosition(fromWidth + mainBody.getSize().x / 2 - 50, 150);
+	roomSize_x.setPosition(fromWidth + mainBody.getSize().x / 2 - 50, 113);
+	roomSize_y.setPosition(fromWidth + mainBody.getSize().x / 2 - 50, 153);
+	reflections_title.setPosition(fromWidth + mainBody.getSize().x / 2, 200);
+	positions_title.setPosition(fromWidth + mainBody.getSize().x / 2, 325);
+	sound_title.setPosition(fromWidth + mainBody.getSize().x / 2, 450);
+	sound.setPosition(fromWidth + mainBody.getSize().x / 2 - 65, 490);
 
 	//#########################################	buttons	#################################
 
-	reflections.setPos(Vector2f(fromWidth + 50, 2000));
-	bestPos.setPos(Vector2f(fromWidth + 50, 123132));
-	back.setPos(Vector2f(fromWidth + 50, 300));
+	reflections.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 250));
+	bestPos.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 375));
+	back.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 575));
 
 	//#########################################	textbox	#################################
 
 	x.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 110));
 	y.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 150));
+	hertz.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 490));
 }
 
 Vector2f sideMenu::getSize()
@@ -124,15 +235,21 @@ void sideMenu::draw(RenderTarget& target, RenderStates states) const
 	states.texture = nullptr;
 
 	target.draw(mainBody, states);
+
 	target.draw(menu_title, states);
 	target.draw(roomSize_title, states);
+	target.draw(reflections_title, states);
+	target.draw(positions_title, states);
+	target.draw(sound_title, states);
+	target.draw(sound, states);
 	target.draw(roomSize_x, states);
 	target.draw(roomSize_y, states);
+
 	target.draw(x, states);
 	target.draw(y, states);
-	target.draw(reflections_title, states);
+	target.draw(hertz, states);
+
 	target.draw(reflections, states);
-	target.draw(positions_title, states);
 	target.draw(bestPos, states);
 	target.draw(back, states);
 }
