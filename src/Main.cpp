@@ -127,7 +127,7 @@ int main()
 
 	START:
 	room.setSource(Point(3.0, 3.0));
-	room.setTarget(Point(5.0, 2.5));
+	room.setTarget(Point(4.0, 2.5));
 	room.calcReflectionPoints();
 	room.setParams(1000);
 	room.calcDistances();
@@ -142,6 +142,8 @@ int main()
 
 	menu.setSize(Vector2f(250, dRoom.getVisualizationSize().y));
 	menu.setBegin((float)dRoom.getVisualizationSize().x);
+	menu.setRoomData(room.getFrequency(), room.getSizeX(), room.getSizeY());
+
 	window.setSize(Vector2u(dRoom.getVisualizationSize().x + (unsigned int)menu.getSize().x, dRoom.getVisualizationSize().y));
 
 

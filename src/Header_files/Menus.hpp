@@ -24,6 +24,8 @@ public:
 	float getBegin();
 
 	std::string checkAction(sf::Event& event, sf::Vector2f& mousePos);
+	void setRoomData(const int frquency, const double sizeX, const double sizeY);
+
 private:
 	sf::Font font;
 

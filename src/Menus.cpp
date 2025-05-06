@@ -7,6 +7,7 @@
 
 #include "Header_files/Menus.hpp"
 #include "Header_files/utils.hpp"
+#include "Header_files/Room.hpp"
 
 using namespace std;
 using namespace sf;
@@ -97,6 +98,8 @@ sideMenu::sideMenu(Vector2f size, float fromWidth)
 	back.setPos(Vector2f(fromWidth + mainBody.getSize().x / 2, 575));
 
 	back.setText("Back");
+	reflections.setText("Hide");
+	bestPos.setText("Show");
 
 	//#########################################	textbox	#################################
 
@@ -252,6 +255,13 @@ void sideMenu::draw(RenderTarget& target, RenderStates states) const
 	target.draw(reflections, states);
 	target.draw(bestPos, states);
 	target.draw(back, states);
+}
+
+void sideMenu::setRoomData(const int frequency, const double sizeX, const double sizeY)
+{
+	hertz.setText(to_string(frequency));
+	x.setText(to_string(sizeX));
+	y.setText(to_string(sizeY));
 }
 
 
