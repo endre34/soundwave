@@ -31,6 +31,8 @@ private:
 	sf::Text menu_title;
 
 	sf::Text roomSize_title;
+	sf::Text roomSize_x;
+	sf::Text roomSize_y;
 	TextField x;
 	TextField y;
 

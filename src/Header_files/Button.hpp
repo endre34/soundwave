@@ -11,7 +11,7 @@
 class Button : public sf::Drawable, public sf::Transformable
 {
 public:
-	Button() {};
+	Button();
 	Button(const sf::Vector2f& size, const sf::Vector2f& position);
 
 	virtual void highlight(bool state);

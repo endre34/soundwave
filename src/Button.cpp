@@ -9,6 +9,17 @@
 using namespace std;
 using namespace sf;
 
+Button::Button()
+{
+	body.setFillColor(Colors::LIGHTGREY);
+	body.setOutlineColor(Colors::BLACK);
+	body.setOutlineThickness(3);
+
+	font.loadFromFile("Media/noto_sans.ttf");
+	text.setFont(font);
+
+	text.setFillColor(Colors::BLACK);
+}
 
 Button::Button(const Vector2f& size, const Vector2f& position)
 {
@@ -67,6 +78,10 @@ void Button::setPos(const Vector2f& position)
 void Button::setSize(const Vector2f& size)
 {
 	body.setSize(size);
+	text.setCharacterSize(size.y / 2);
+
+	body.setOrigin(body.getGlobalBounds().width / 2, body.getGlobalBounds().height / 2);
+	text.setOrigin(text.getGlobalBounds().width / 2, text.getGlobalBounds().height / 2);
 }
 
 bool Button::isInside(const Vector2f& mousePos)
